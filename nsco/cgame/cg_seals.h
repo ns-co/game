@@ -1,6 +1,5 @@
 #define NS_VERSION	"v0.1"
-#define MAX_MENU_LINES	19
-//#define MAX_CHARS_PER_LINE	64
+#define MAX_MENU_LINES	19 
 
 // same as in g_seals.h
 #define ARMOR_NONE		0
@@ -8,15 +7,12 @@
 #define ARMOR_MEDIUM	2
 #define ARMOR_HEAVY		3
 
-typedef struct menuState_s { 
-	char	Line[65];
-	float	*l_color;
+typedef struct menuState_s {
+    char	Line[65];
+    float	*l_color;
 } menuState_t;
 
-extern menuState_t i_Menu[MAX_MENU_LINES];
-
-
-
+extern menuState_t i_Menu[MAX_MENU_LINES]; 
 
 // seals
 void CG_LoadBarInit( void );

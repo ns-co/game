@@ -110,17 +110,17 @@
 #endif
 
 typedef enum {
-	GT_FFA,				// free for all  
- 	//-- team games go after this --
+    GT_FFA,				// free for all
+    //-- team games go after this --
 
-	GT_TEAM,			// team deathmatch
-	
-	GT_TRAIN,
-	// Navy Seals ++
-	GT_LTS,				// shit 
+    GT_TEAM,			// team deathmatch
 
-	// Navy Seals --
-	GT_MAX_GAME_TYPE
+    GT_TRAIN,
+    // Navy Seals ++
+    GT_LTS,				// shit
+
+    // Navy Seals --
+    GT_MAX_GAME_TYPE
 } gametype_t;
 
 typedef enum { GENDER_MALE, GENDER_FEMALE, GENDER_NEUTER } gender_t;
@@ -137,38 +137,38 @@ movement on the server game.
 */
 
 typedef enum {
-	PM_NORMAL,		// can accelerate and turn
-	PM_NOCLIP,		// noclip movement
-	PM_SPECTATOR,	// still run into walls
-	PM_DEAD,		// no acceleration or turning, but free falling
-	PM_FREEZE,		// stuck in place with no control
-	PM_INTERMISSION,	// no movement or status bar
-	PM_SPINTERMISSION	// no movement or status bar
+    PM_NORMAL,		// can accelerate and turn
+    PM_NOCLIP,		// noclip movement
+    PM_SPECTATOR,	// still run into walls
+    PM_DEAD,		// no acceleration or turning, but free falling
+    PM_FREEZE,		// stuck in place with no control
+    PM_INTERMISSION,	// no movement or status bar
+    PM_SPINTERMISSION	// no movement or status bar
 } pmtype_t;
 // Navy Seals ++
 typedef enum {
-	WEAPON_READY,				// idling
-	WEAPON_RAISING,				//	raise the gun
-	WEAPON_DROPPING,			// holster the gun
-	WEAPON_FIRING,				// fire the gun
-	WEAPON_FIRING2,	
-	WEAPON_FIRING3,					
-	WEAPON_FIREEMPTY,			// firing an empty gun
-	WEAPON_RELOADING,			// start reloading	
-	WEAPON_RELOADING_CYCLE,		// loading in (hand up / hand down)
-	WEAPON_RELOADING_STOP,		// putting shotgun down
-	WEAPON_RELOADING_EMPTY,		// reloading an empty gun (not required)
-	WEAPON_LASTRND,				// firing the last rnd (then moving to IDLE_EMPTY)
-	WEAPON_BANDAGING_START,		// wepaon moving down
-	WEAPON_BANDAGING_END,		// weapon moving up
-	WEAPON_BANDAGING,			// in bandage
-	WEAPON_MELEE,
-	WEAPON_THROW,
-	WEAPON_FIRING21,
-	WEAPON_FIRING22,
-	WEAPON_FIRING23,
-	WEAPON_IDLEMODE2,
-	WEAPON_HOLSTERING			// same as weapon_dropping
+    WEAPON_READY,				// idling
+    WEAPON_RAISING,				//	raise the gun
+    WEAPON_DROPPING,				// holster the gun
+    WEAPON_FIRING,				// fire the gun
+    WEAPON_FIRING2,
+    WEAPON_FIRING3,
+    WEAPON_FIREEMPTY,			// firing an empty gun
+    WEAPON_RELOADING,			// start reloading
+    WEAPON_RELOADING_CYCLE,		// loading in (hand up / hand down)
+    WEAPON_RELOADING_STOP,		// putting shotgun down
+    WEAPON_RELOADING_EMPTY,		// reloading an empty gun (not required)
+    WEAPON_LASTRND,			// firing the last rnd (then moving to IDLE_EMPTY)
+    WEAPON_BANDAGING_START,		// wepaon moving down
+    WEAPON_BANDAGING_END,		// weapon moving up
+    WEAPON_BANDAGING,			// in bandage
+    WEAPON_MELEE,
+    WEAPON_THROW,
+    WEAPON_FIRING21,
+    WEAPON_FIRING22,
+    WEAPON_FIRING23,
+    WEAPON_IDLEMODE2,
+    WEAPON_HOLSTERING			// same as weapon_dropping
 } weaponstate_t;
 // Navy Seals --
 // pmove->pm_flags
@@ -188,43 +188,43 @@ typedef enum {
 #define PMF_BLOCKED		128		// is in range of a bomb
 #define PMF_SHOT_LOCKED		4
 #define PMF_ASSAULTRANGE	32768
-#define PMF_CLIMB			2048	// climbing up / down a ladder 
+#define PMF_CLIMB			2048	// climbing up / down a ladder
 // Navy Seals --
 #define	PMF_ALL_TIMES	(PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK)
 
 #define	MAXTOUCH	32
 typedef struct {
-	// state (in / out)
-	playerState_t	*ps;
+    // state (in / out)
+    playerState_t	*ps;
 
-	// command (in)
-	usercmd_t	cmd;
-	int			tracemask;			// collide against these types of surfaces
-	int			debugLevel;			// if set, diagnostic output will be printed
-	qboolean	noFootsteps;		// if the game is setup for no footsteps by the server
-	qboolean	gauntletHit;		// true if a gauntlet attack would actually hit something
+    // command (in)
+    usercmd_t	cmd;
+    int			tracemask;			// collide against these types of surfaces
+    int			debugLevel;			// if set, diagnostic output will be printed
+    qboolean	noFootsteps;					// if the game is setup for no footsteps by the server
+    qboolean	gauntletHit;					// true if a gauntlet attack would actually hit something
 
-	int			framecount;
+    int			framecount;
 
-	// results (out)
-	int			numtouch;
-	int			touchents[MAXTOUCH];
+    // results (out)
+    int			numtouch;
+    int			touchents[MAXTOUCH];
 
-	vec3_t		mins, maxs;			// bounding box size
+    vec3_t		mins, maxs;			// bounding box size
 
-	int			watertype;
-	int			waterlevel;
+    int			watertype;
+    int			waterlevel;
 
-	float		xyspeed;
+    float		xyspeed;
 
-	// for fixed msec Pmove
-	int			pmove_fixed;
-	int			pmove_msec;
+    // for fixed msec Pmove
+    int			pmove_fixed;
+    int			pmove_msec;
 
-	// callbacks to test the world
-	// these will be different functions during game and cgame
-	void		(*trace)( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask );
-	int			(*pointcontents)( const vec3_t point, int passEntityNum );
+    // callbacks to test the world
+    // these will be different functions during game and cgame
+    void		(*trace)( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask );
+    int			(*pointcontents)( const vec3_t point, int passEntityNum );
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles
@@ -237,29 +237,29 @@ void Pmove (pmove_t *pmove);
 // player_state->stats[] indexes
 // NOTE: may not have more than 16
 typedef enum {
-	// Navy Seals ++
- 	STAT_HEALTH, 
-	STAT_WEAPONS, 					// 16 bit fields
-	STAT_WEAPONS2,
-	
- 	STAT_CLIENTS_READY, 			// bit mask of clients wishing to exit the intermission (FIXME: configstring?)
+    // Navy Seals ++
+    STAT_HEALTH,
+    STAT_WEAPONS, 					// 16 bit fields
+    STAT_WEAPONS2,
 
-	STAT_ARM_DAMAGE, 				// arm damage
-	STAT_LEG_DAMAGE,				// player walks slower when he got some legdamage,
-	STAT_CHEST_DAMAGE,				// chest damage
-	STAT_STOMACH_DAMAGE,			// stomach damage
-	STAT_HEAD_DAMAGE,
+    STAT_CLIENTS_READY, 			// bit mask of clients wishing to exit the intermission (FIXME: configstring?)
 
-	STAT_WEAPONMODE,				// current weapon mode
- 
-	STAT_STAMINA,					// stamina
-	STAT_STEALTH,					// stealth
-	STAT_ACTIVE_ITEMS,				// which powerups are active?
+    STAT_ARM_DAMAGE, 				// arm damage
+    STAT_LEG_DAMAGE,				// player walks slower when he got some legdamage,
+    STAT_CHEST_DAMAGE,				// chest damage
+    STAT_STOMACH_DAMAGE,			// stomach damage
+    STAT_HEAD_DAMAGE,
 
-	STAT_ROUNDS,					// seals define, for rounds in gun
+    STAT_WEAPONMODE,				// current weapon mode
 
-	STAT_SEED						// for antilag
- // Navy Seals --
+    STAT_STAMINA,					// stamina
+    STAT_STEALTH,					// stealth
+    STAT_ACTIVE_ITEMS,					// which powerups are active?
+
+    STAT_ROUNDS,					// seals define, for rounds in gun
+
+    STAT_SEED						// for antilag
+    // Navy Seals --
 } statIndex_t;
 
 
@@ -268,20 +268,20 @@ typedef enum {
 // cleared on respawn
 // NOTE: may not have more than 16
 typedef enum {
-	PERS_XP,	// i changed this so the launchers/serverbrowsers show the XP instead of the kills
-	PERS_SCORE,						// !!! MUST NOT CHANGE, SERVER AND GAME BOTH REFERENCE !!!
- 	PERS_RANK,						// player rank or team rank
-	PERS_TEAM,						// player team
-	PERS_SPAWN_COUNT,				// incremented every respawn
-	PERS_PLAYEREVENTS,				// 16 bits that can be flipped for events
- 	// player character
-	PERS_STRENGTH,
-	PERS_TECHNICAL,
-	PERS_STAMINA,
-	PERS_ACCURACY,
-	PERS_SPEED,
-	PERS_STEALTH
-// Navy Seals --
+    PERS_XP,	// i changed this so the launchers/serverbrowsers show the XP instead of the kills
+    PERS_SCORE, // !!! MUST NOT CHANGE, SERVER AND GAME BOTH REFERENCE !!!
+    PERS_RANK,	// player rank or team rank
+    PERS_TEAM,	// player team
+    PERS_SPAWN_COUNT, // incremented every respawn
+    PERS_PLAYEREVENTS,	// 16 bits that can be flipped for events
+    // player character
+    PERS_STRENGTH,
+    PERS_TECHNICAL,
+    PERS_STAMINA,
+    PERS_ACCURACY,
+    PERS_SPEED,
+    PERS_STEALTH
+    // Navy Seals --
 } persEnum_t;
 
 
@@ -323,7 +323,7 @@ typedef enum {
 #define EF_WEAPONS_LOCKED	0x00008000		// will lock weapons
 
 #define EF_RADIO_TALK		0x00010000
-#define EF_WEAPONMODE3		0x00020000	 
+#define EF_WEAPONMODE3		0x00020000
 #define EF_IRONSIGHT		0x00040000		// denied
 #define EF_TEAMVOTED		0x00080000		// already cast a team vote
 
@@ -332,51 +332,51 @@ typedef enum {
 // Navy Seals ++
 // NOTE: may not have more than 16
 typedef enum {
-	PW_NONE, 
+    PW_NONE,
 
-	PW_SCOPE,
-	PW_M203GL,
-	PW_BAYONET, 
-	PW_FLASHLIGHT,
-	PW_DUCKBILL,
-  
-		// navy seals +
-	PW_VEST,
-	PW_HELMET, 
+    PW_SCOPE,
+    PW_M203GL,
+    PW_BAYONET,
+    PW_FLASHLIGHT,
+    PW_DUCKBILL,
 
-	PW_BRIEFCASE,
-	PW_BRIEFCASE_RETURN,
-	PW_LASERSIGHT, // hack
-	// navy seals -
-	PW_NVG,
+    // navy seals +
+    PW_VEST,
+    PW_HELMET,
 
-
-	PW_NUM_POWERUPS
-
-} powerup_t; 
-
-typedef enum {
-	UI_NONE, 
-
-	// navy seals -
-	UI_NVG,
+    PW_BRIEFCASE,
+    PW_BRIEFCASE_RETURN,
+    PW_LASERSIGHT, // hack
+    // navy seals -
+    PW_NVG,
 
 
-	UI_NUM_ITEMS
+    PW_NUM_POWERUPS
 
-} useableItems_t; 
-
+} powerup_t;
 
 typedef enum {
-	HI_NONE,
+    UI_NONE,
 
-	HI_TELEPORTER,
-	HI_MEDKIT,
-	HI_KAMIKAZE,
-	HI_PORTAL,
-	HI_INVULNERABILITY,
+    // navy seals -
+    UI_NVG,
 
-	HI_NUM_HOLDABLE
+
+    UI_NUM_ITEMS
+
+} useableItems_t;
+
+
+typedef enum {
+    HI_NONE,
+
+    HI_TELEPORTER,
+    HI_MEDKIT,
+    HI_KAMIKAZE,
+    HI_PORTAL,
+    HI_INVULNERABILITY,
+
+    HI_NUM_HOLDABLE
 } holdable_t;
 
 /*
@@ -410,123 +410,123 @@ typedef enum {
 */
 
 /*
- SYNC THIS CRAP WITH ../../ui/menudef.h !!!!
+SYNC THIS CRAP WITH ../../ui/menudef.h !!!!
 */
 typedef enum {
-	WP_NONE, // 0
-	
-	// ns
-	WP_KHURKURI,
-	WP_SEALKNIFE, // must be first
+    WP_NONE, // 0
 
-	// explosives	
-	WP_C4,
-	WP_GRENADE,	
-	WP_FLASHBANG,  
+    // ns
+    WP_KHURKURI,
+    WP_SEALKNIFE, // must be first
 
-	// pistols
-	WP_MK23,	
-	WP_GLOCK,
-	WP_SW40T,
-	WP_P9S,
-	WP_DEAGLE,
-	WP_SW629,
+    // explosives
+    WP_C4,
+    WP_GRENADE,
+    WP_FLASHBANG,
 
-	// smgs
-	WP_PDW,	
-	WP_MAC10,
-	WP_MP5,	 
+    // pistols
+    WP_MK23,
+    WP_GLOCK,
+    WP_SW40T,
+    WP_P9S,
+    WP_DEAGLE,
+    WP_SW629,
 
-	// rifles
-	WP_AK47,	
-	WP_M4,
+    // smgs
+    WP_PDW,
+    WP_MAC10,
+    WP_MP5,
 
-	// sniper rifles
-	WP_PSG1,
-	WP_MACMILLAN,
+    // rifles
+    WP_AK47,
+    WP_M4,
 
-	// machineguns
-	// grenadelaunchers	
+    // sniper rifles
+    WP_PSG1,
+    WP_MACMILLAN,
 
-	// shotguns
-	WP_870,
-	WP_M590,
-	// assault shotguns
-	WP_SPAS15,
+    // machineguns
+    // grenadelaunchers
 
-	WP_M14,
-	WP_M249,
-	WP_SL8SD,
-	
-	WP_SMOKE,
+    // shotguns
+    WP_870,
+    WP_M590,
+    // assault shotguns
+    WP_SPAS15,
 
-	// misc
-	WP_NUM_WEAPONS   
-} weapon_t; 
+    WP_M14,
+    WP_M249,
+    WP_SL8SD,
+
+    WP_SMOKE,
+
+    // misc
+    WP_NUM_WEAPONS
+} weapon_t;
 
 // weaponmodes
 typedef enum {
-	WM_NONE,
+    WM_NONE,
 
-	WM_BURST,
-	WM_SINGLE,
-	WM_SCOPE,
-	WM_LASER, // determines wheter we got one attached or not
-	WM_SILENCER,
-	WM_GRENADEROLL, // 
-	WM_DUCKBILL,		// db attached
-	WM_FLASHLIGHT,	// fl attached
-	WM_GRENADELAUNCHER, // gl attached
+    WM_BURST,
+    WM_SINGLE,
+    WM_SCOPE,
+    WM_LASER, // determines wheter we got one attached or not
+    WM_SILENCER,
+    WM_GRENADEROLL, //
+    WM_DUCKBILL,    // db attached
+    WM_FLASHLIGHT,  // fl attached
+    WM_GRENADELAUNCHER, // gl attached
 
-	// --- //
+    // --- //
 
-	WM_BAYONET,
-	WM_WEAPONMODE2,	// for m4,ak47(gl/bayonet),shotgun:870,m590 (flashlight)
-	WM_LACTIVE,   // determines wheter the lasersight is active or not
-	WM_ZOOM2X,	  // zoom...  
-	WM_ZOOM4X,
+    WM_BAYONET,
+    WM_WEAPONMODE2,	// for m4,ak47(gl/bayonet),shotgun:870,m590 (flashlight)
+    WM_LACTIVE,	// determines wheter the lasersight is active or not
+    WM_ZOOM2X,		// zoom...
+    WM_ZOOM4X,
 
-	WM_MUZZLEHIDER,
+    WM_MUZZLEHIDER,
 
-	// --- //
+    // --- //
 
 } weaponmode_t;
 
 typedef enum {
-	
-	// shotgun shells
-	AM_SHOTGUN,
-	AM_SHOTGUNMAG,
 
-	// pistol
-	AM_LIGHT_PISTOL,
-	AM_MEDIUM_PISTOL,
-	AM_LARGE_PISTOL,
+    // shotgun shells
+    AM_SHOTGUN,
+    AM_SHOTGUNMAG,
 
-	// other weapons / smg / rifle
-	AM_SMG,
-	AM_RIFLE,
-	AM_MG,
-	AM_MEDIUM_SNIPER,
-	AM_LARGE_SNIPER,
+    // pistol
+    AM_LIGHT_PISTOL,
+    AM_MEDIUM_PISTOL,
+    AM_LARGE_PISTOL,
 
-	// grenades
-	AM_GRENADES,
-	AM_FLASHBANGS, 
-	AM_SMOKE,
-	AM_40MMGRENADES,
+    // other weapons / smg / rifle
+    AM_SMG,
+    AM_RIFLE,
+    AM_MG,
+    AM_MEDIUM_SNIPER,
+    AM_LARGE_SNIPER,
 
-	AM_NUM_AMMO
+    // grenades
+    AM_GRENADES,
+    AM_FLASHBANGS,
+    AM_SMOKE,
+    AM_40MMGRENADES,
+
+    AM_NUM_AMMO
 
 } ammo_t;
 
 typedef enum {
-	
-	// shotgun shells
-	MF_NONE,
 
-	MF_SMOKE
-} missleFunc_t; 
+    // shotgun shells
+    MF_NONE,
+
+    MF_SMOKE
+} missleFunc_t;
 // Navy Seals --
 
 // reward sounds (stored in ps->persistant[PERS_PLAYEREVENTS])
@@ -548,306 +548,306 @@ typedef enum {
 #define	EV_EVENT_BITS		( EV_EVENT_BIT1 | EV_EVENT_BIT2 )
 
 typedef enum {
-	EV_NONE,
+    EV_NONE,
 
-	EV_FOOTSTEP,
-	EV_FOOTSTEP_METAL,
-	EV_FOOTSTEP_DIRT,
-	EV_FOOTSTEP_SNOW,
-	EV_FOOTSTEP_WOOD,
+    EV_FOOTSTEP,
+    EV_FOOTSTEP_METAL,
+    EV_FOOTSTEP_DIRT,
+    EV_FOOTSTEP_SNOW,
+    EV_FOOTSTEP_WOOD,
 
-	EV_FOOTSPLASH,
-	EV_FOOTWADE,
-	EV_SWIM,
+    EV_FOOTSPLASH,
+    EV_FOOTWADE,
+    EV_SWIM,
 
-	EV_STEP_4,
-	EV_STEP_8,
-	EV_STEP_12,
-	EV_STEP_16,
+    EV_STEP_4,
+    EV_STEP_8,
+    EV_STEP_12,
+    EV_STEP_16,
 
-	EV_FALL_SHORT, // only footstep sound
-	EV_FALL_LIGHT, // light damage
-	EV_FALL_MEDIUM,
-	EV_FALL_FAR,   // heavy damage 
-	EV_FALL_DEATH,	// immediate death!
+    EV_FALL_SHORT, // only footstep sound
+    EV_FALL_LIGHT, // light damage
+    EV_FALL_MEDIUM,
+    EV_FALL_FAR,   // heavy damage
+    EV_FALL_DEATH, // immediate death!
 
-	EV_STOLENWEAPON,
-	EV_JUMP_PAD,			// boing sound at origin, jump sound on player
+    EV_STOLENWEAPON,
+    EV_JUMP_PAD,			// boing sound at origin, jump sound on player
 
-	EV_JUMP,
-	EV_WATER_TOUCH,	// foot touches
-	EV_WATER_LEAVE,	// foot leaves
-	EV_WATER_UNDER,	// head touches
-	EV_WATER_CLEAR,	// head leaves
+    EV_JUMP,
+    EV_WATER_TOUCH,	// foot touches
+    EV_WATER_LEAVE,	// foot leaves
+    EV_WATER_UNDER,	// head touches
+    EV_WATER_CLEAR,	// head leaves
 
-	EV_ITEM_PICKUP,			// normal item pickups are predictable
-	EV_GLOBAL_ITEM_PICKUP,	// powerup / team sounds are broadcast to everyone
+    EV_ITEM_PICKUP,			// normal item pickups are predictable
+    EV_GLOBAL_ITEM_PICKUP,		// powerup / team sounds are broadcast to everyone
 
-	EV_NOAMMO,
-	EV_CHANGE_WEAPON,
-	EV_FIRE_WEAPON,
-	EV_FIRE_WEAPON_OTHER,
+    EV_NOAMMO,
+    EV_CHANGE_WEAPON,
+    EV_FIRE_WEAPON,
+    EV_FIRE_WEAPON_OTHER,
 
-	EV_USE_ITEM0,
-	EV_USE_ITEM1,
-	EV_USE_ITEM2,
-	EV_USE_ITEM3,
-	EV_USE_ITEM4,
-	EV_USE_ITEM5,
-	EV_USE_ITEM6,
-	EV_USE_ITEM7,
-	EV_USE_ITEM8,
-	EV_USE_ITEM9,
-	EV_USE_ITEM10,
-	EV_USE_ITEM11,
-	EV_USE_ITEM12,
-	EV_USE_ITEM13,
-	EV_USE_ITEM14,
-	EV_USE_ITEM15,
+    EV_USE_ITEM0,
+    EV_USE_ITEM1,
+    EV_USE_ITEM2,
+    EV_USE_ITEM3,
+    EV_USE_ITEM4,
+    EV_USE_ITEM5,
+    EV_USE_ITEM6,
+    EV_USE_ITEM7,
+    EV_USE_ITEM8,
+    EV_USE_ITEM9,
+    EV_USE_ITEM10,
+    EV_USE_ITEM11,
+    EV_USE_ITEM12,
+    EV_USE_ITEM13,
+    EV_USE_ITEM14,
+    EV_USE_ITEM15,
 
-	EV_ITEM_RESPAWN,
-	EV_ITEM_POP,
-	EV_PLAYER_TELEPORT_IN,
-	EV_PLAYER_TELEPORT_OUT,
+    EV_ITEM_RESPAWN,
+    EV_ITEM_POP,
+    EV_PLAYER_TELEPORT_IN,
+    EV_PLAYER_TELEPORT_OUT,
 
-	EV_GRENADE_BOUNCE,		// eventParm will be the soundindex
+    EV_GRENADE_BOUNCE,		// eventParm will be the soundindex
 
-	EV_GENERAL_SOUND,
-	EV_GLOBAL_SOUND,		// no attenuation
-	EV_GLOBAL_TEAM_SOUND,
+    EV_GENERAL_SOUND,
+    EV_GLOBAL_SOUND,		// no attenuation
+    EV_GLOBAL_TEAM_SOUND,
 
-	EV_BULLET_HIT_FLESH,
-	EV_BULLET_HIT_WALL,
+    EV_BULLET_HIT_FLESH,
+    EV_BULLET_HIT_WALL,
 
-	EV_MISSILE_HIT,
-	EV_MISSILE_MISS,
-	EV_MISSILE_MISS_METAL,
-	EV_RAILTRAIL,
-	EV_SHOTGUN,
-	EV_BULLET,				// otherEntity is the shooter
+    EV_MISSILE_HIT,
+    EV_MISSILE_MISS,
+    EV_MISSILE_MISS_METAL,
+    EV_RAILTRAIL,
+    EV_SHOTGUN,
+    EV_BULLET,				// otherEntity is the shooter
 
-	EV_PAIN,
-	EV_DEATH,
-	EV_OBITUARY,
+    EV_PAIN,
+    EV_DEATH,
+    EV_OBITUARY,
 
-	EV_POWERUP_QUAD,
-	EV_POWERUP_BATTLESUIT,
-	EV_POWERUP_REGEN,
+    EV_POWERUP_QUAD,
+    EV_POWERUP_BATTLESUIT,
+    EV_POWERUP_REGEN,
 
-	EV_GIB_PLAYER,			// gib a previously living player
-	EV_SCOREPLUM,			// score plum
+    EV_GIB_PLAYER,			// gib a previously living player
+    EV_SCOREPLUM,			// score plum
 
-//#ifdef MISSIONPACK
-	EV_PROXIMITY_MINE_STICK,
-	EV_PROXIMITY_MINE_TRIGGER,
-	EV_KAMIKAZE,			// kamikaze explodes
-	EV_OBELISKEXPLODE,		// obelisk explodes
-	EV_OBELISKPAIN,			// obelisk is in pain
-	EV_INVUL_IMPACT,		// invulnerability sphere impact
-	EV_JUICED,				// invulnerability juiced effect
-	EV_LIGHTNINGBOLT,		// lightning bolt bounced of invulnerability sphere
-//#endif
+    //#ifdef MISSIONPACK
+    EV_PROXIMITY_MINE_STICK,
+    EV_PROXIMITY_MINE_TRIGGER,
+    EV_KAMIKAZE,			// kamikaze explodes
+    EV_OBELISKEXPLODE,			// obelisk explodes
+    EV_OBELISKPAIN,			// obelisk is in pain
+    EV_INVUL_IMPACT,			// invulnerability sphere impact
+    EV_JUICED,				// invulnerability juiced effect
+    EV_LIGHTNINGBOLT,			// lightning bolt bounced of invulnerability sphere
+    //#endif
 
-	EV_DEBUG_LINE,
-	EV_STOPLOOPINGSOUND,
-	EV_TAUNT,
-	EV_TAUNT_YES,
-	EV_TAUNT_NO,
-	EV_TAUNT_FOLLOWME,
-	EV_TAUNT_GETFLAG,
-	EV_TAUNT_GUARDBASE,
+    EV_DEBUG_LINE,
+    EV_STOPLOOPINGSOUND,
+    EV_TAUNT,
+    EV_TAUNT_YES,
+    EV_TAUNT_NO,
+    EV_TAUNT_FOLLOWME,
+    EV_TAUNT_GETFLAG,
+    EV_TAUNT_GUARDBASE,
 
-	EV_GAMESTATE,
+    EV_GAMESTATE,
 
-	EV_BLOODER,
-	EV_BLOOD_ON_WALL,
+    EV_BLOODER,
+    EV_BLOOD_ON_WALL,
 
-	EV_EMPTYCLIP, 
+    EV_EMPTYCLIP,
 
-	EV_BANDAGING, 
-	EV_EXPLOSION,
-	EV_C4DEPLOY,
+    EV_BANDAGING,
+    EV_EXPLOSION,
+    EV_C4DEPLOY,
 
-	EV_RELOAD,	// reload 
-	EV_RELOAD_EMPTY, 
+    EV_RELOAD,	// reload
+    EV_RELOAD_EMPTY,
 
-	EV_FUNCEXPLOSIVE,
-	EV_FLASHBANG,
+    EV_FUNCEXPLOSIVE,
+    EV_FLASHBANG,
 
-	EV_BLOODPOOL,
-	EV_LOCALSOUND,
+    EV_BLOODPOOL,
+    EV_LOCALSOUND,
 
-	// clipping wire
-	EV_CLIPWIRE_1,
-	EV_CLIPWIRE_2,
-	EV_CLIPWIRE_3,
-	EV_CLIPWIRE_4,
-	EV_CLIPWIRE_5,
-	EV_CLIPWIRE_6,
-	EV_CLIPWIRE_7,
-	EV_CLIPWIRE_8,
+    // clipping wire
+    EV_CLIPWIRE_1,
+    EV_CLIPWIRE_2,
+    EV_CLIPWIRE_3,
+    EV_CLIPWIRE_4,
+    EV_CLIPWIRE_5,
+    EV_CLIPWIRE_6,
+    EV_CLIPWIRE_7,
+    EV_CLIPWIRE_8,
 
-	EV_BREAKLOCK
+    EV_BREAKLOCK
 } entity_event_t;
 
 
 typedef enum {
-	GTS_REDTEAM_SCORED,
-	GTS_BLUETEAM_SCORED,
-	GTS_REDTEAM_TOOK_LEAD,
-	GTS_BLUETEAM_TOOK_LEAD,
-	GTS_TEAMS_ARE_TIED, // still missing
-	GTS_DRAW_ROUND,
-	GTS_BRIEFCASE_TAKEN,
-	GTS_RED_BRIEFCASE_RETURN,
-	GTS_BLUE_BRIEFCASE_RETURN,
+    GTS_REDTEAM_SCORED,
+    GTS_BLUETEAM_SCORED,
+    GTS_REDTEAM_TOOK_LEAD,
+    GTS_BLUETEAM_TOOK_LEAD,
+    GTS_TEAMS_ARE_TIED, // still missing
+    GTS_DRAW_ROUND,
+    GTS_BRIEFCASE_TAKEN,
+    GTS_RED_BRIEFCASE_RETURN,
+    GTS_BLUE_BRIEFCASE_RETURN,
 
-	GTS_AF1_CAPTURED,
-	GTS_AF1_BLOCKED,
-	GTS_AF1_TAPPED,
+    GTS_AF1_CAPTURED,
+    GTS_AF1_BLOCKED,
+    GTS_AF1_TAPPED,
 
-	GTS_AF2_CAPTURED,
-	GTS_AF2_BLOCKED,
-	GTS_AF2_TAPPED,
+    GTS_AF2_CAPTURED,
+    GTS_AF2_BLOCKED,
+    GTS_AF2_TAPPED,
 
-	GTS_AF3_CAPTURED,
-	GTS_AF3_BLOCKED,
-	GTS_AF3_TAPPED,
+    GTS_AF3_CAPTURED,
+    GTS_AF3_BLOCKED,
+    GTS_AF3_TAPPED,
 
-	GTS_AF4_CAPTURED,
-	GTS_AF4_BLOCKED,
-	GTS_AF4_TAPPED,
-	
+    GTS_AF4_CAPTURED,
+    GTS_AF4_BLOCKED,
+    GTS_AF4_TAPPED,
+
 
 } global_team_sound_t;
 
 // animations
 typedef enum {
 
-BOTH_DEATH_FACE,
-BOTH_DEAD_FACE,
-BOTH_DEATH_CHEST,
-BOTH_DEAD_CHEST,
-BOTH_DEATH_STOMACH,
-BOTH_DEAD_STOMACH,
-BOTH_DEATH_BLEED,
-BOTH_DEAD_BLEED,
-BOTH_DEATH_NECK,
-BOTH_DEAD_NECK,
-BOTH_DEATH_BACK,
-BOTH_DEAD_BACK,
-BOTH_DEATH_LEGS,
-BOTH_DEAD_LEGS,
-	
-TORSO_GESTURE1,
-TORSO_GESTURE2,
-TORSO_GESTURE3,
+    BOTH_DEATH_FACE,
+    BOTH_DEAD_FACE,
+    BOTH_DEATH_CHEST,
+    BOTH_DEAD_CHEST,
+    BOTH_DEATH_STOMACH,
+    BOTH_DEAD_STOMACH,
+    BOTH_DEATH_BLEED,
+    BOTH_DEAD_BLEED,
+    BOTH_DEATH_NECK,
+    BOTH_DEAD_NECK,
+    BOTH_DEATH_BACK,
+    BOTH_DEAD_BACK,
+    BOTH_DEATH_LEGS,
+    BOTH_DEAD_LEGS,
 
-TORSO_OPEN_DOOR,
+    TORSO_GESTURE1,
+    TORSO_GESTURE2,
+    TORSO_GESTURE3,
 
-TORSO_RELOAD_RIFLE,
-TORSO_RELOAD_PISTOL,
+    TORSO_OPEN_DOOR,
 
-TORSO_STAND_RIFLE,
-TORSO_ATTACK_RIFLE,	
+    TORSO_RELOAD_RIFLE,
+    TORSO_RELOAD_PISTOL,
 
-TORSO_STAND_RIFLE_SCOPED,
-TORSO_ATTACK_RIFLE_SCOPED,
+    TORSO_STAND_RIFLE,
+    TORSO_ATTACK_RIFLE,
 
-TORSO_STAND_PISTOL,
-TORSO_ATTACK_PISTOL,	
+    TORSO_STAND_RIFLE_SCOPED,
+    TORSO_ATTACK_RIFLE_SCOPED,
 
-TORSO_STAND_SUITCASE,
-TORSO_ATTACK_SUITCASE,
+    TORSO_STAND_PISTOL,
+    TORSO_ATTACK_PISTOL,
 
-TORSO_STAND_ITEM,
-TORSO_ATTACK_MELEE,
-TORSO_THROW,
+    TORSO_STAND_SUITCASE,
+    TORSO_ATTACK_SUITCASE,
 
-TORSO_USE,	
+    TORSO_STAND_ITEM,
+    TORSO_ATTACK_MELEE,
+    TORSO_THROW,
 
-TORSO_STEER_LEFT,	
-TORSO_STEER_IDLE,
-TORSO_STEER_RIGHT,
+    TORSO_USE,
 
-TORSO_RAISE_RIFLE,	
-TORSO_DROP_RIFLE,	
-TORSO_RAISE_PISTOL,			
-TORSO_DROP_PISTOL,
+    TORSO_STEER_LEFT,
+    TORSO_STEER_IDLE,
+    TORSO_STEER_RIGHT,
 
-TORSO_CLIMB,
-TORSO_CLIMB_IDLE,
-	
-LEGS_IDLECR,
-LEGS_WALKCR,
+    TORSO_RAISE_RIFLE,
+    TORSO_DROP_RIFLE,
+    TORSO_RAISE_PISTOL,
+    TORSO_DROP_PISTOL,
 
-LEGS_IDLE,
-LEGS_WALK,
-LEGS_RUN,
-LEGS_BACK,
-LEGS_LIMP,
-LEGS_TURN,
+    TORSO_CLIMB,
+    TORSO_CLIMB_IDLE,
 
-LEGS_SWIM,
+    LEGS_IDLECR,
+    LEGS_WALKCR,
 
-LEGS_JUMP,
-LEGS_LAND,
+    LEGS_IDLE,
+    LEGS_WALK,
+    LEGS_RUN,
+    LEGS_BACK,
+    LEGS_LIMP,
+    LEGS_TURN,
 
-LEGS_CLIMB,
-LEGS_CLIMB_IDLE,
+    LEGS_SWIM,
 
-LEGS_SIT_CAR,
-// must be last - hardcoded 
-LEGS_BACKCR,
-LEGS_BACKLIMB,
-LEGS_IDLE_RIFLE_SCOPED,
-LEGS_IDLECR_RIFLE_SCOPED,
+    LEGS_JUMP,
+    LEGS_LAND,
 
-MAX_ANIMATIONS
+    LEGS_CLIMB,
+    LEGS_CLIMB_IDLE,
+
+    LEGS_SIT_CAR,
+    // must be last - hardcoded
+    LEGS_BACKCR,
+    LEGS_BACKLIMB,
+    LEGS_IDLE_RIFLE_SCOPED,
+    LEGS_IDLECR_RIFLE_SCOPED,
+
+    MAX_ANIMATIONS
 } animNumber_t;
 
 // animations
 typedef enum {
-	WANIM_PUTUP,
-	WANIM_PUTAWAY,
-	WANIM_ATTACK,	
-	WANIM_ATTACK2,
-	WANIM_ATTACK3,
-	WANIM_LASTRND,
-	WANIM_IDLE,
-	WANIM_IDLE_EMPTY,
-	WANIM_RELOAD,
-	WANIM_RELOAD_EMPTY,
-	WANIM_RELOAD_CYCLE,
-	WANIM_RELOAD_STOP,
-	WANIM_SPIN1,
-	WANIM_MELEE,
-	WANIM_THROW,
-	WANIM_SPIN2,
-	WANIM_ATTACKMODE21,
-	WANIM_ATTACKMODE22,
-	WANIM_ATTACKMODE23,
+    WANIM_PUTUP,
+    WANIM_PUTAWAY,
+    WANIM_ATTACK,
+    WANIM_ATTACK2,
+    WANIM_ATTACK3,
+    WANIM_LASTRND,
+    WANIM_IDLE,
+    WANIM_IDLE_EMPTY,
+    WANIM_RELOAD,
+    WANIM_RELOAD_EMPTY,
+    WANIM_RELOAD_CYCLE,
+    WANIM_RELOAD_STOP,
+    WANIM_SPIN1,
+    WANIM_MELEE,
+    WANIM_THROW,
+    WANIM_SPIN2,
+    WANIM_ATTACKMODE21,
+    WANIM_ATTACKMODE22,
+    WANIM_ATTACKMODE23,
 
-	WANIM_IRONSIGHT_UP,
-	WANIM_IRONSIGHTIDLE,
-	WANIM_IRONSIGHT_DN,
-	WANIM_IRONSIGHT_ATK1,// fixed to the same length as the normal attack frames
-	WANIM_IRONSIGHT_ATK2,// there don't have to be 2,3 only if the normal
-	WANIM_IRONSIGHT_ATK3,//fire-animation 
+    WANIM_IRONSIGHT_UP,
+    WANIM_IRONSIGHTIDLE,
+    WANIM_IRONSIGHT_DN,
+    WANIM_IRONSIGHT_ATK1,// fixed to the same length as the normal attack frames
+    WANIM_IRONSIGHT_ATK2,// there don't have to be 2,3 only if the normal
+    WANIM_IRONSIGHT_ATK3,//fire-animation
 
-	WANIM_UNKNOWN,	// should be last... always
-	MAX_WEAPON_ANIMATIONS
+    WANIM_UNKNOWN,	// should be last... always
+    MAX_WEAPON_ANIMATIONS
 } weaponAnimNumber_t;
 
 
 typedef struct animation_s {
-	int		firstFrame;
-	int		numFrames;
-	int		loopFrames;			// 0 to numFrames
-	int		frameLerp;			// msec between frames
-	int		initialLerp;		// msec to get to first frame
-	int		reversed;			// true if animation is reversed
-	int		flipflop;			// true if animation should flipflop back to base
+    int		firstFrame;
+    int		numFrames;
+    int		loopFrames;			// 0 to numFrames
+    int		frameLerp;			// msec between frames
+    int		initialLerp;			// msec to get to first frame
+    int		reversed;			// true if animation is reversed
+    int		flipflop;			// true if animation should flipflop back to base
 } animation_t;
 
 
@@ -857,21 +857,21 @@ typedef struct animation_s {
 
 
 typedef enum {
-	TEAM_FREE,
-	TEAM_RED,
-	TEAM_BLUE,
-	TEAM_SPECTATOR,
+    TEAM_FREE,
+    TEAM_RED,
+    TEAM_BLUE,
+    TEAM_SPECTATOR,
 
-	TEAM_NUM_TEAMS
+    TEAM_NUM_TEAMS
 } team_t;
 
 typedef enum {
-/*	STATE_WAITING,
-	STATE_INPROGRESS,
-	STATE_ROUNDOVER*/
-	STATE_OPEN,
-	STATE_OVER,
-	STATE_LOCKED
+    /*	STATE_WAITING,
+    STATE_INPROGRESS,
+    STATE_ROUNDOVER*/
+    STATE_OPEN,
+    STATE_OVER,
+    STATE_LOCKED
 } gamestate_t;
 
 // Time between location updates
@@ -882,52 +882,52 @@ typedef enum {
 
 //team task
 typedef enum {
-	TEAMTASK_NONE,
-	TEAMTASK_OFFENSE, 
-	TEAMTASK_DEFENSE,
-	TEAMTASK_PATROL,
-	TEAMTASK_FOLLOW,
-	TEAMTASK_RETRIEVE,
-	TEAMTASK_ESCORT,
-	TEAMTASK_CAMP
+    TEAMTASK_NONE,
+    TEAMTASK_OFFENSE,
+    TEAMTASK_DEFENSE,
+    TEAMTASK_PATROL,
+    TEAMTASK_FOLLOW,
+    TEAMTASK_RETRIEVE,
+    TEAMTASK_ESCORT,
+    TEAMTASK_CAMP
 } teamtask_t;
 
 // means of death
 typedef enum {
-	MOD_UNKNOWN,
-	MOD_SHOTGUN,
-	MOD_GAUNTLET,
-	MOD_MACHINEGUN,
-	MOD_GRENADE,
-	MOD_GRENADE_SPLASH,
-	MOD_ROCKET,
-	MOD_ROCKET_SPLASH,
-	MOD_PLASMA,
-	MOD_PLASMA_SPLASH,
-	MOD_RAILGUN,
-	MOD_LIGHTNING,
-	MOD_BFG,
-	MOD_BFG_SPLASH,
-	MOD_WATER,
-	MOD_SLIME,
-	MOD_LAVA,
-	MOD_CRUSH,
-	MOD_TELEFRAG,
-	MOD_FALLING,
-	MOD_SUICIDE,
-	MOD_TARGET_LASER,
-	MOD_TRIGGER_HURT,
+    MOD_UNKNOWN,
+    MOD_SHOTGUN,
+    MOD_GAUNTLET,
+    MOD_MACHINEGUN,
+    MOD_GRENADE,
+    MOD_GRENADE_SPLASH,
+    MOD_ROCKET,
+    MOD_ROCKET_SPLASH,
+    MOD_PLASMA,
+    MOD_PLASMA_SPLASH,
+    MOD_RAILGUN,
+    MOD_LIGHTNING,
+    MOD_BFG,
+    MOD_BFG_SPLASH,
+    MOD_WATER,
+    MOD_SLIME,
+    MOD_LAVA,
+    MOD_CRUSH,
+    MOD_TELEFRAG,
+    MOD_FALLING,
+    MOD_SUICIDE,
+    MOD_TARGET_LASER,
+    MOD_TRIGGER_HURT,
 #ifdef MISSIONPACK
-	MOD_NAIL,
-	MOD_CHAINGUN,
-	MOD_PROXIMITY_MINE,
-	MOD_KAMIKAZE,
-	MOD_JUICED,
+    MOD_NAIL,
+    MOD_CHAINGUN,
+    MOD_PROXIMITY_MINE,
+    MOD_KAMIKAZE,
+    MOD_JUICED,
 #endif
-	MOD_GRAPPLE,
-	MOD_BLEED,
-	MOD_HEADSHOT,
-	MOD_LEAD
+    MOD_GRAPPLE,
+    MOD_BLEED,
+    MOD_HEADSHOT,
+    MOD_LEAD
 } meansOfDeath_t;
 
 
@@ -935,53 +935,52 @@ typedef enum {
 
 // gitem_t->type
 typedef enum {
-	IT_BAD,
-	IT_WEAPON,				// EFX: rotate + upscale + minlight
-	IT_AMMO,				// EFX: rotate
-	IT_ARMOR,				// EFX: rotate + minlight
-	IT_HEALTH,				// EFX: static external sphere + rotating internal
-	IT_POWERUP,				// instant on, timer based
-							// EFX: rotate + external ring that rotates
-	IT_HOLDABLE,			// single use, holdable item
-							// EFX: rotate + bob
-	IT_BOTROAM,				// for bots
-	IT_PERSISTANT_POWERUP,
-	IT_TEAM
+    IT_BAD,
+    IT_WEAPON,				// EFX: rotate + upscale + minlight
+    IT_AMMO,				// EFX: rotate
+    IT_ARMOR,				// EFX: rotate + minlight
+    IT_HEALTH,				// EFX: static external sphere + rotating internal
+    IT_POWERUP,			// instant on, timer based
+    // EFX: rotate + external ring that rotates
+    IT_HOLDABLE,			// single use, holdable item
+    // EFX: rotate + bob
+    IT_BOTROAM,			// for bots 
+    IT_TEAM
 } itemType_t;
 
 // message status
 typedef enum {
-	MS_NONE,
+    MS_NONE,
 
-	MS_HEALTH1, // good (>100-80)
-	MS_HEALTH2,
-	MS_HEALTH3,
-	MS_HEALTH4,
-	MS_HEALTH5, // poor ( 0-20)
+    MS_HEALTH1, // good (>100-80)
+    MS_HEALTH2,
+    MS_HEALTH3,
+    MS_HEALTH4,
+    MS_HEALTH5, // poor ( 0-20)
 
-	MS_DEAD,
-	MS_BOMB
+    MS_DEAD,
+    MS_BOMB
 
 } messageStatus_t;
 
 #define MAX_ITEM_MODELS 4
 
 typedef struct gitem_s {
-	char		*classname;	// spawning name
-	char		*pickup_sound;
-	char		*world_model[MAX_ITEM_MODELS];
+    char		*classname;	// spawning name
+    char		*pickup_sound;
+    char		*world_model[MAX_ITEM_MODELS];
 
-	char		*icon;
-	char		*pickup_name;	// for printing on pickup
+    char		*icon;
+    char		*pickup_name;	// for printing on pickup
 
-	int			quantity;		// for ammo how much, or duration of powerup
-	itemType_t  giType;			// IT_* flags
+    int			quantity;		// for ammo how much, or duration of powerup
+    itemType_t  giType;				// IT_* flags
 
-	int			giTag;
-	int			giAmmoTag;
+    int			giTag;
+    int			giAmmoTag;
 
-	char		*precaches;		// string of all models and images this item will use
-	char		*sounds;		// string of all sounds this item will use
+    char		*precaches;		// string of all models and images this item will use
+    char		*sounds;		// string of all sounds this item will use
 } gitem_t;
 
 // included in both the game dll and the client
@@ -1008,8 +1007,8 @@ qboolean	BG_CanItemBeGrabbed( int gametype, const entityState_t *ent, const play
 #define	MASK_SOLID				(CONTENTS_SOLID)
 #define	MASK_PLAYERSOLID		(CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_BODY)
 #define	MASK_DEADSOLID			(CONTENTS_SOLID|CONTENTS_PLAYERCLIP)
-#define	MASK_WATER				(CONTENTS_WATER|CONTENTS_LAVA|CONTENTS_SLIME)
-#define	MASK_OPAQUE				(CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA)
+#define	MASK_WATER				(CONTENTS_WATER)
+#define	MASK_OPAQUE				(CONTENTS_SOLID)
 #define	MASK_SHOT				(CONTENTS_SOLID|CONTENTS_BODY|CONTENTS_CORPSE)
 
 
@@ -1017,42 +1016,42 @@ qboolean	BG_CanItemBeGrabbed( int gametype, const entityState_t *ent, const play
 // entityState_t->eType
 //
 typedef enum {
-	ET_GENERAL,
-	ET_PLAYER,
-	ET_ITEM,
-	ET_MISSILE,
-	ET_MOVER,
-	ET_BEAM,
-	ET_PORTAL,
-	ET_SPEAKER,
-	ET_PUSH_TRIGGER,
-	ET_TELEPORT_TRIGGER,
-	ET_INVISIBLE,
-	ET_GRAPPLE,				// grapple hooked on wall
-	ET_TEAM,
-	ET_FLARE,
-	ET_BULLET,
-	
-	ET_DOOR,
-	ET_FUNCEXPLOSIVE,
+    ET_GENERAL,
+    ET_PLAYER,
+    ET_ITEM,
+    ET_MISSILE,
+    ET_MOVER,
+    ET_BEAM,
+    ET_PORTAL,
+    ET_SPEAKER,
+    ET_PUSH_TRIGGER,
+    ET_TELEPORT_TRIGGER,
+    ET_INVISIBLE,
+    ET_GRAPPLE,				// grapple hooked on wall
+    ET_TEAM,
+    ET_FLARE,
+    ET_BULLET,
+
+    ET_DOOR,
+    ET_FUNCEXPLOSIVE,
 #define PARTICLEHOST 1
 
 #ifdef PARTICLEHOST
-	ET_PARTICLEHOST, 
+    ET_PARTICLEHOST,
 #endif
-	ET_ELEVBUT0,
-	ET_ELEVBUT1,
-	ET_ELEVBUT2,
-	ET_ELEVBUT3,
-	ET_ELEVBUT4,
-	ET_ELEVBUT5,
-	ET_ELEVBUT6,
-	ET_ELEVBUT7,
-//	ET_ACTOR, // actors like hostages
+    ET_ELEVBUT0,
+    ET_ELEVBUT1,
+    ET_ELEVBUT2,
+    ET_ELEVBUT3,
+    ET_ELEVBUT4,
+    ET_ELEVBUT5,
+    ET_ELEVBUT6,
+    ET_ELEVBUT7,
+    //	ET_ACTOR, // actors like hostages
 
-	ET_EVENTS				// any of the EV_* events can be added freestanding
-							// by setting eType to ET_EVENTS + eventNum
-							// this avoids having to set eFlags and eventNum
+    ET_EVENTS				// any of the EV_* events can be added freestanding
+    // by setting eType to ET_EVENTS + eventNum
+    // this avoids having to set eFlags and eventNum
 } entityType_t;
 
 
@@ -1125,47 +1124,117 @@ void BG_ClearWeapons( int stats[ ] );
 void BG_RemoveWeapon( int weapon, int stats[ ] );
 qboolean BG_GotWeapon( int weapon, int stats[ ] );
 // navy seals-
- 
+
 // Camoflage
 typedef enum {
-	CAMO_NONE, // 0
+    CAMO_NONE, // 0
 
-	CAMO_DESERT, // 1
-	CAMO_JUNGLE, // 2
-	CAMO_ARCTIC,// 3
-	CAMO_URBAN,// 4
+    CAMO_DESERT, // 1
+    CAMO_JUNGLE, // 2
+    CAMO_ARCTIC, // 3
+    CAMO_URBAN,  // 4
 
-	CAMO_TOTAL
-} camotypes_t;           
+    CAMO_TOTAL
+} camotypes_t;
 
-// Player Equipment 
+// Player Equipment
 typedef enum {
-	EQ_NONE,
+    EQ_NONE,
 
-	EQ_STORMGOGGLES,
-	EQ_JOINT,
-	EQ_PIECEOFHAY,
-	EQ_NVGOGGLES,
-	EQ_SEALHAT,
-	EQ_TURBAN,
-	EQ_HELMET,
+    EQ_STORMGOGGLES,
+    EQ_JOINT,
+    EQ_PIECEOFHAY,
+    EQ_NVGOGGLES,
+    EQ_SEALHAT,
+    EQ_TURBAN,
+    EQ_HELMET,
 
-	EQ_TOTAL
-} equipmenttypes_t;           
- 
+    EQ_TOTAL
+} equipmenttypes_t;
+
 // Navy Seals ++
 typedef enum {
-	BHOLE_NORMAL, // stone - default
-	BHOLE_GLASS,
-	BHOLE_METAL,
-	BHOLE_SAND,
-	BHOLE_SNOW,
-	BHOLE_SOFT,
-	BHOLE_WOOD,
-	BHOLE_STONE,
-	BHOLE_DIRT,
+    BHOLE_NORMAL, // stone - default
+    BHOLE_GLASS,
+    BHOLE_METAL,
+    BHOLE_SAND,
+    BHOLE_SNOW,
+    BHOLE_SOFT,
+    BHOLE_WOOD,
+    BHOLE_STONE,
+    BHOLE_DIRT,
 
-	BHOLE_TOTAL
-} bullethole_t; 
+    BHOLE_TOTAL
+} bullethole_t;
 // Navy Seals --
 
+
+// brasstype
+typedef enum {
+    BRASS_NONE,
+
+    BRASS_PISTOL,
+    BRASS_PISTOL_LEFT,
+
+    BRASS_RIFLE,
+    BRASS_RIFLE_LEFT,
+
+    BRASS_SHOTGUN,
+    BRASS_SHOTGUN_LEFT,
+
+    BRASS_COLT,
+
+    BRASS_TOTAL
+} brasstype_t;
+
+#define MAX_WEAPONPARTS		12
+
+// each WP_* weapon enum has an associated weaponInfo_t
+// that contains media references necessary to present the
+// weapon and its effects
+typedef struct weaponInfo_s {
+    qboolean		registered;
+    gitem_t			*item; 
+    qhandle_t		handsModel;			// the hands don't actually draw, they just position the weapon
+    qhandle_t		weaponModel; 
+    qhandle_t		silencerModel;
+    qhandle_t		scopeModel;
+    qhandle_t		lasersightModel;
+    qhandle_t		flashModel;
+    qhandle_t		bayonetModel;
+    qhandle_t		v_silencerModel;
+    qhandle_t		v_scopeModel;
+    qhandle_t		v_lasersightModel;
+    qhandle_t		v_flashModel;
+    qhandle_t		v_glModel;
+    qhandle_t		v_bayonetModel;
+
+    qhandle_t		viewweaponModel;
+    qhandle_t		t_viewweaponSkin;
+    qhandle_t		glModel;
+    qhandle_t		weaponIcon; 
+
+    qhandle_t		weaponParts[MAX_WEAPONPARTS];
+    char			*partTags[MAX_WEAPONPARTS];
+ 
+    float			flashDlight;
+    vec3_t			flashDlightColor;
+    sfxHandle_t		flashSound[4];		// fast firing weapons randomly choose 
+    sfxHandle_t		sil_flashSound[4];	// sileneced..
+    sfxHandle_t		otherflashSound[4];	// sileneced..  
+	sfxHandle_t		reloadSound;
+    sfxHandle_t		reloadEmptySound;
+
+    qhandle_t		missileModel;
+    sfxHandle_t		missileSound; 
+    float			missileDlight;
+    vec3_t			missileDlightColor; 
+
+    brasstype_t		ejectBrassType;		// type of brass to be ejected
+    int				ejectBrassNum;		// amount of brass to be ejected
+
+    float			trailRadius;
+    float			wiTrailTime;
+
+    int				kickBack;
+} weaponInfo_t;

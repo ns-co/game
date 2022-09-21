@@ -18,11 +18,15 @@
 //
 // IMPORTANT 2:
 // This file is property of Team Mirage. You are not allowed to copy it or
-// even share it with others. 
+// even share it with others.
 //
 // Blutengel 2003/01/08
 //
 // ###########################################################################
+
+// ###########################################################################
+// clientgame sound specific
+#define SEALS_FOOTSTEP_FALLOFF		0.12f
 
 // ###########################################################################
 // grenade specific
@@ -87,7 +91,7 @@
 #define SEALS_SMOKENADE_B_DESERT 0.47f
 
 // bitmasks
-#define SEALS_SMOKEMASK_UP        0x0000c000 
+#define SEALS_SMOKEMASK_UP        0x0000c000
 #define SEALS_SMOKEMASK_FORWARD   0x00003000
 #define SEALS_SMOKEMASK_BACKWARD  0x00000c00
 #define SEALS_SMOKEMASK_LEFT      0x00000300
@@ -201,7 +205,7 @@
 // Weapons general stuff
 #define SEALS_WEAP_LASER_MOD 0.6 // factor multiplied with deflection degree if the weapon has a laser and is no pistol
 #define SEALS_WEAP_PISTOLLASER_MOD 0.8 // factor multiplied with deflection degree if the weapon has a laser and is a pistol
-#define SEALS_WEAP_CROUCH_MOD 0.7 // factor multiplied with deflection degree if the character is crouching 
+#define SEALS_WEAP_CROUCH_MOD 0.7 // factor multiplied with deflection degree if the character is crouching
 #define SEALS_WEAP_SCOPE_MOD 0.02 // factor multiplied with deflection degree if the weapon is in scope mode
 #define SEALS_WEAP_PDW_MOD 0.9 // factor multiplied with deflection if the weapon is the pdw in secondary mode
 #define SEALS_DUCKBILL_HOR_MOD 1.5 // factor multiplied with horizontal deflection if the weapon has a duckbill
@@ -295,7 +299,7 @@
 #define SEALS_WKICK_SW629         1.5
 #define SEALS_WKICK_DEAGLE        1.5
 
-#define SEALS_WKICK_DEFAULT       2.0 
+#define SEALS_WKICK_DEFAULT       2.0
 
 // ###########################################################################
 // weapon knockback for the different weapons
@@ -394,9 +398,9 @@
 #define SEALS_WEIGHT_KEVLAR            3.0
 
 #define SEALS_WEIGHT_SHOTGUNMAG        0.45   // spas15
-#define SEALS_WEIGHT_SHOTGUN           0.05   // normal shotgun  
+#define SEALS_WEIGHT_SHOTGUN           0.05   // normal shotgun
 
-#define SEALS_WEIGHT_LIGHT_PISTOL      0.1      
+#define SEALS_WEIGHT_LIGHT_PISTOL      0.1
 #define SEALS_WEIGHT_MEDIUM_PISTOL    0.1
 #define SEALS_WEIGHT_LARGE_PISTOL      0.2
 
@@ -420,7 +424,7 @@
 #define SEALS_INCLUDE_NVG 0 // set to 1 if night vision gogles should be included
 #define SEALS_NO_GRENADE_CROSSHAIR 1 // set to 1 if there should be no crosshair when grenades are selected
 
-#define	NS_FLAG_BUSY_CARRIYNG	0x00000001		 
+#define	NS_FLAG_BUSY_CARRIYNG	0x00000001
 #define NS_FLAG_END_ROUND	    0x00000002
 #define NS_FLAG_LOOP          0x00000004
 #define NS_FLAG_DEFUSABLE     0x00000008

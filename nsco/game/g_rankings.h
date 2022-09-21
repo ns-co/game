@@ -7,41 +7,41 @@
 ==============================================================================
 
 Key digits:
-	10^9: report type
-			1 = normal
-			2 = developer-only
-	10^8: stat type
-			0 = match stat
-			1 = single player stat
-			2 = duel stat
-	10^7: data type
-			0 = string
-			1 = uint32
-	10^6: calculation
-			0 = use raw value
-			1 = add to total
-			2 = average
-			3 = max
-			4 = min
-	10^5
-	10^4: category
-			00 = general
-			01 = session
-			02 = weapon
-			03 = ammo
-			04 = health
-			05 = armor
-			06 = powerup
-			07 = holdable
-			08 = hazard
-			09 = reward
-			10 = teammate
-			11 = ctf
-	10^3:
-	10^2: sub-category
-	10^1:
-	10^0: ordinal
- 
+10^9: report type
+1 = normal
+2 = developer-only
+10^8: stat type
+0 = match stat
+1 = single player stat
+2 = duel stat
+10^7: data type
+0 = string
+1 = uint32
+10^6: calculation
+0 = use raw value
+1 = add to total
+2 = average
+3 = max
+4 = min
+10^5
+10^4: category
+00 = general
+01 = session
+02 = weapon
+03 = ammo
+04 = health
+05 = armor
+06 = powerup
+07 = holdable
+08 = hazard
+09 = reward
+10 = teammate
+11 = ctf
+10^3:
+10^2: sub-category
+10^1:
+10^0: ordinal
+
 ==============================================================================
 */
 

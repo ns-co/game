@@ -2,21 +2,21 @@
 //
 
 /*****************************************************************************
- * name:		general_ns.h
- *
- * desc:		defines and stuff for NS
- *
- * -Archive: /source/game/general_ns.h
- * -Author: dX - 
- * -Revision: 1
- * -Modtime: 14/feb/2k 3:32p (last modification)
- * -Date: 08/feb/2k (creation)
- *
- *****************************************************************************/
+* name:		general_ns.h
+*
+* desc:		defines and stuff for NS
+*
+* -Archive: /source/game/general_ns.h
+* -Author: dX -
+* -Revision: 1
+* -Modtime: 14/feb/2k 3:32p (last modification)
+* -Date: 08/feb/2k (creation)
+*
+*****************************************************************************/
 
 // used as return value in g_combat.c / general_ns.c
 // i also use to see wheter a player (client) bleeds at a location
-// if (ent->client->bleeding[LOC_HEAD] == qtrue) 
+// if (ent->client->bleeding[LOC_HEAD] == qtrue)
 // understood?
 
 #define LOC_NULL			0
@@ -51,7 +51,7 @@
 
 #define VIP_NONE			0
 #define VIP_ESCAPE			1
-#define VIP_STAYALIVE		2 
+#define VIP_STAYALIVE		2
 
 #define RESPAWN_INVUNERABILITY_TIME 4500
 
@@ -77,12 +77,12 @@
 #define	REWARD_6KILL				0x00004000
 #define	REWARD_2KILL_GRENADE		0x00010000
 #define	REWARD_4KILL_GRENADE		0x00020000
- 
+
 #define	REWARD_HS_KILL				0x00040000
 #define	REWARD_HS_2KILL				0x00080000
 
 #define	REWARD_BOMB_EXPLODE			0x00100000
-#define	REWARD_BOMB_DEFUSE			0x00200000	
+#define	REWARD_BOMB_DEFUSE			0x00200000
 #define REWARD_BRIEFCASE_KILL		0x00400000
 #define REWARD_BRIEFCASE_2ND		0x00800000
 
@@ -115,7 +115,7 @@ extern	vmCvar_t	g_LockXP;
 
 
 extern int GameState;
-extern int	lastvip[TEAM_NUM_TEAMS];	
+extern int	lastvip[TEAM_NUM_TEAMS];
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -129,36 +129,36 @@ extern int	lastvip[TEAM_NUM_TEAMS];
 // Antilag information
 typedef struct gantilag_s
 {
-	vec3_t	rOrigin;				// entity.r.currentOrigin
-	vec3_t	rAngles;				// entity.r.currentAngles
-	vec3_t	mins;					// entity.r.mins
-	vec3_t	maxs;					// entity.r.maxs 
+    vec3_t	rOrigin;				// entity.r.currentOrigin
+    vec3_t	rAngles;				// entity.r.currentAngles
+    vec3_t	mins;					// entity.r.mins
+    vec3_t	maxs;					// entity.r.maxs
 
-	int		time;					// time history item was saved
-	int		leveltime;  
+    int		time;					// time history item was saved
+    int		leveltime;
 
-	int		pm_flags;				// entity.client.ps.pm_flags
+    int		pm_flags;				// entity.client.ps.pm_flags
 
 } gantilag_t;
 
 // misc structurs / stuff
 typedef enum {false,true} boolean;
 // functions
-  
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //
 // Radio Code
 //
 ////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct radio_msg_s 
+typedef struct radio_msg_s
 {
-        char soundAlias[128];      // the msg name [alias]
+    char soundAlias[128];      // the msg name [alias]
 
-		int soundIndex; //  sound index, for clientsystem
-        int soundLength;     // length in server frames (thousand of a second), rounded up
-		char chatString[256]; // chat message 
-		int	signalType;
+    int soundIndex; //  sound index, for clientsystem
+    int soundLength; // length in server frames (thousand of a second), rounded up
+    char chatString[256]; // chat message
+    int	signalType;
 } radio_msg_t;
 
 #define RADIO_CLICK                     "sound/radio/click.wav"
@@ -167,17 +167,17 @@ typedef struct radio_msg_s
 #define MAX_SOUNDFILE_PATH_LEN          32 // max length of a sound file path
 #define MAX_RADIO_MSG_QUEUE_SIZE        4
 #define MAX_RADIO_QUEUE_SIZE            6  // this must be at least 2 greater than the above
- 
+
 // SEALS - RADIO [org: fireblade]
 typedef struct radio_queue_entry_s
 {
-        int soundIndex;
-        gentity_t *from_player; 
-        qboolean now_playing;
-        int length;
-		int	gesture;
-		char chatString[256];
-        qboolean click;
+    int soundIndex;
+    gentity_t *from_player;
+    qboolean now_playing;
+    int length;
+    int	gesture;
+    char chatString[256];
+    qboolean click;
 } radio_queue_entry_t;
 
 typedef struct navyseals_s navyseals_t;
@@ -188,44 +188,44 @@ typedef struct navyseals_s navyseals_t;
 //
 ////////////////////////////////////////////////////////////////////////////////////////
 typedef struct navyseals_s{
-	int rounds[WP_NUM_WEAPONS*3];	// hack...
-	int weaponmode[WP_NUM_WEAPONS];
-	int	reload_tries;
-	int weaponmode_tries[3];
-	int	shots;
-	int	weigth;
-	int opendoor; 
-	int	bandagepoints; 
-	qboolean is_driving;
-	int	num_killed;
-	int	rewards;
+    int rounds[WP_NUM_WEAPONS*3];	// hack...
+    int weaponmode[WP_NUM_WEAPONS];
+    int	reload_tries;
+    int weaponmode_tries[3];
+    int	shots;
+    int	weigth;
+    int opendoor;
+    int	bandagepoints;
+    qboolean is_driving;
+    int	num_killed;
+    int	rewards;
 
-	qboolean is_vip;
-	qboolean is_vipWithBriefcase;
-	qboolean got_defusekit;
+    qboolean is_vip;
+    qboolean is_vipWithBriefcase;
+    qboolean got_defusekit;
 
-	gentity_t	*lasersight;
-	int	locationOfDeath;
+    gentity_t	*lasersight;
+    int	locationOfDeath;
 
-	int			weapon_angles[3];	// add to command angles to get view direction
- 
+    int			weapon_angles[3];	// add to command angles to get view direction
+
     int radio_delay;
-	int	radio_power_off;
+    int	radio_power_off;
     radio_queue_entry_t radio_queue[MAX_RADIO_QUEUE_SIZE];
     int radio_queue_size;
-	int radio_channel;
+    int radio_channel;
 
-	gentity_t *bomb_parent;
-	gentity_t *bomb_world; // placed bomb
-	int		   bomb_wireTime;
-	int		   bomb_wires[8];
+    gentity_t *bomb_parent;
+    gentity_t *bomb_world; // placed bomb
+    int		   bomb_wireTime;
+    int		   bomb_wires[8];
 
-	qboolean	test; 
+    qboolean	test;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-//  headgear/playermodel handling 
+//  headgear/playermodel handling
 //
 ///////////////////////////////////////////////////////////////////////////////////////
 #define MAX_HEADGEAR		64
@@ -235,18 +235,18 @@ typedef struct navyseals_s{
 typedef struct heargear_s headgear_t;
 
 typedef struct heargear_s{
-	   	char	e_head[MAX_HEADGEAR][MAX_QPATH],
-				e_eyes[MAX_HEADGEAR][MAX_QPATH],
-				e_mouth[MAX_HEADGEAR][MAX_QPATH];
+    char	e_head[MAX_HEADGEAR][MAX_QPATH],
+    e_eyes[MAX_HEADGEAR][MAX_QPATH],
+    e_mouth[MAX_HEADGEAR][MAX_QPATH];
 
-		char	playerModel[MAX_PLAYERMODELS][MAX_QPATH];
-		char	faceSkin[MAX_FACESKINS][MAX_QPATH];
+    char	playerModel[MAX_PLAYERMODELS][MAX_QPATH];
+    char	faceSkin[MAX_FACESKINS][MAX_QPATH];
 
-		int		numHead;
-		int		numEyes;
-		int		numMouth;
-		int		numPPM;
-		int		numFaceSkin;
+    int		numHead;
+    int		numEyes;
+    int		numMouth;
+    int		numPPM;
+    int		numFaceSkin;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -344,7 +344,7 @@ void CheckTeamplay ();
 
 // remove me later
 void Laser_Gen(gentity_t *ent, int type);
- 
+
 // Entities
 void Touch_Goal (gentity_t *ent, gentity_t *other, trace_t *trace);
 void Think_Goal (gentity_t *self);
@@ -381,7 +381,7 @@ void NS_HandleRadioMenu ( gentity_t *ent, int menuSlot );
 void NS_HandleEquipmentMenu ( gentity_t *ent, int menuSlot );
 void NS_HandleCreateClassMenu ( gentity_t *ent, int menuSlot );
 void NS_HandlePlayerMenu ( gentity_t *ent, int menuSlot );
- 
+
 // Miscs
 gentity_t	*SelectTeamSpawnPoint ( team_t team, int teamstate, vec3_t origin, vec3_t angles );
 gentity_t	*NS_FindRadius (gentity_t *ent, vec3_t org, float rad);
@@ -414,10 +414,10 @@ void G_ApplyAntiLag			( gentity_t* ref );
 
 void NS_CalculateRadar( gentity_t *ent );
 void NS_ValidatePlayerLooks( int team, char *headGear,
-								char *eyeGear, 
-								char *mouthGear,
-								char *playerModel,
-								char *faceSkin );
+                             char *eyeGear,
+                             char *mouthGear,
+                             char *playerModel,
+                             char *faceSkin );
 void NS_RecalcCharacter( gentity_t *ent );
 void Think_SetupTrainTargets( gentity_t *ent );
 qboolean NS_ActiveRound( void );

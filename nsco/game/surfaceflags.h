@@ -1,4 +1,4 @@
-// Copyright (C) 1999-2000 Id Software, Inc.
+// Copyright (C) 2003-2006 team mirage
 //
 // This file must be identical in the quake and utils directories
 
@@ -8,25 +8,21 @@
 // these definitions also need to be in q_shared.h!
 
 #define	CONTENTS_SOLID			1		// an eye is never valid in a solid
-#define	CONTENTS_LAVA			8
-#define	CONTENTS_SLIME			16
 #define	CONTENTS_WATER			32
 #define	CONTENTS_FOG			64
 
-#define	CONTENTS_AREAPORTAL		0x8000
+#define	CONTENTS_SEWER			0x80
+#define	CONTENTS_HALLWAY		0x100
+#define CONTENTS_ARENA			0x200
+#define CONTENTS_ROOM			0x400
+#define CONTENTS_ALLEY			0x800
+#define CONTENTS_PLAIN			0x1000
+#define CONTENTS_CITY			0x2000
 
+#define	CONTENTS_AREAPORTAL		0x8000
 #define	CONTENTS_PLAYERCLIP		0x10000
 #define	CONTENTS_MONSTERCLIP	0x20000
-//bot specific contents types
-#define	CONTENTS_TELEPORTER		0x40000
-#define	CONTENTS_JUMPPAD		0x80000
-#define CONTENTS_CLUSTERPORTAL	0x100000
-#define CONTENTS_DONOTENTER		0x200000
-#define CONTENTS_BOTCLIP		0x400000
-#define CONTENTS_MOVER			0x800000
-
 #define	CONTENTS_ORIGIN			0x1000000	// removed before bsping an entity
-
 #define	CONTENTS_BODY			0x2000000	// should never be on a brush, only in game
 #define	CONTENTS_CORPSE			0x4000000
 #define	CONTENTS_DETAIL			0x8000000	// brushes not used for the bsp
@@ -54,11 +50,9 @@
 #define	SURF_ALPHASHADOW		0x10000	// do per-pixel light shadow casting in q3map
 #define	SURF_NODLIGHT			0x20000	// don't dlight even if solid (solid lava, skies)
 #define SURF_DUST				0x40000 // leave a dust trail when walking on this surface
-// Navy Seals ++
 #define SURF_WOODSTEPS			0x100000 // woodsounds while walking on these
 #define SURF_DIRTSTEPS			0x200000 // grass/dirt footsteps
-#define SURF_SNOWSTEPS			0x400000 // snow footsteps 
+#define SURF_SNOWSTEPS			0x400000 // snow footsteps
 #define SURF_SANDSTEPS			0x800000
 #define SURF_GLASS				0x1000000
 #define SURF_SOFTSTEPS			0x2000000
-// Navy Seals --

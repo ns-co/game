@@ -1,4 +1,17 @@
-$Id: changelog,v 1.84 2004/09/12 10:00:45 blutengel Exp $
+$Id: changelog,v 1.84 2004/09/12 10:00:45 defconx Exp $
+
+--defconx: start
+
+2006/01/25:
+* beautified the entire codebase using 'astyle.sourceforge.net'
+* fixed alot of crash bugs
+* added new trapcall for extended sound calls
+* added new cursor_dn function to the ui
+* resized cursor to 64 points
+* cleaned up code ( removed alot of ta/q3a functions )
+* removed chat rendering from clientgame
+
+--defconx: end
 
 2004/09/12:
 * patched g_seals.c
