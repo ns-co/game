@@ -1,0 +1,16971 @@
+export G_TestEntityPosition
+code
+proc G_TestEntityPosition 68 28
+file "../g_mover.c"
+line 41
+;1:// Copyright (C) 1999-2000 Id Software, Inc.
+;2://
+;3:
+;4:// every line of code that differs from the quake3:arena SDK
+;5:// is property of manfred nerurkar
+;6:// no commercial explotation allowed
+;7:// you are only allowed to use this code in navy seals: covert operations 
+;8:// a quake3 arena modifiation
+;9://
+;10:// fix the rotating door god damn
+;11:
+;12:// defcon-x@ns-co.net
+;13:
+;14:#include "g_local.h" 
+;15:
+;16:/*
+;17:===============================================================================
+;18:
+;19:PUSHMOVE
+;20:
+;21:===============================================================================
+;22:*/
+;23:
+;24:void MatchTeam( gentity_t *teamLeader, int moverState, int time );
+;25:
+;26:typedef struct {
+;27:	gentity_t	*ent;
+;28:	vec3_t	origin;
+;29:	vec3_t	angles;
+;30:	float	deltayaw;
+;31:} pushed_t;
+;32:pushed_t	pushed[MAX_GENTITIES], *pushed_p;
+;33:
+;34:
+;35:/*
+;36:============
+;37:G_TestEntityPosition
+;38:
+;39:============
+;40:*/
+;41:gentity_t	*G_TestEntityPosition( gentity_t *ent ) {
+line 45
+;42:	trace_t	tr;
+;43:	int		mask;
+;44:
+;45:	if ( ent->clipmask ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 572
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $70
+line 46
+;46:		mask = ent->clipmask;
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+CNSTI4 572
+ADDP4
+INDIRI4
+ASGNI4
+line 47
+;47:	} else {
+ADDRGP4 $71
+JUMPV
+LABELV $70
+line 48
+;48:		mask = MASK_SOLID;
+ADDRLP4 56
+CNSTI4 1
+ASGNI4
+line 49
+;49:	}
+LABELV $71
+line 50
+;50:	if ( ent->client ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $72
+line 51
+;51:		trap_Trace( &tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs, ent->client->ps.origin, ent->s.number, mask );
+ADDRLP4 0
+ARGP4
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 64
+ADDRLP4 60
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+ASGNP4
+ADDRLP4 64
+INDIRP4
+ARGP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 436
+ADDP4
+ARGP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 448
+ADDP4
+ARGP4
+ADDRLP4 64
+INDIRP4
+ARGP4
+ADDRLP4 60
+INDIRP4
+INDIRI4
+ARGI4
+ADDRLP4 56
+INDIRI4
+ARGI4
+ADDRGP4 trap_Trace
+CALLV
+pop
+line 52
+;52:	} else {
+ADDRGP4 $73
+JUMPV
+LABELV $72
+line 53
+;53:		trap_Trace( &tr, ent->s.pos.trBase, ent->r.mins, ent->r.maxs, ent->s.pos.trBase, ent->s.number, mask );
+ADDRLP4 0
+ARGP4
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 64
+ADDRLP4 60
+INDIRP4
+CNSTI4 24
+ADDP4
+ASGNP4
+ADDRLP4 64
+INDIRP4
+ARGP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 436
+ADDP4
+ARGP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 448
+ADDP4
+ARGP4
+ADDRLP4 64
+INDIRP4
+ARGP4
+ADDRLP4 60
+INDIRP4
+INDIRI4
+ARGI4
+ADDRLP4 56
+INDIRI4
+ARGI4
+ADDRGP4 trap_Trace
+CALLV
+pop
+line 54
+;54:	}
+LABELV $73
+line 56
+;55:	
+;56:	if (tr.startsolid)
+ADDRLP4 0+4
+INDIRI4
+CNSTI4 0
+EQI4 $74
+line 57
+;57:		return &g_entities[ tr.entityNum ];
+CNSTI4 1108
+ADDRLP4 0+52
+INDIRI4
+MULI4
+ADDRGP4 g_entities
+ADDP4
+RETP4
+ADDRGP4 $69
+JUMPV
+LABELV $74
+line 59
+;58:		
+;59:	return NULL;
+CNSTP4 0
+RETP4
+LABELV $69
+endproc G_TestEntityPosition 68 28
+export G_TryPushingEntity
+proc G_TryPushingEntity 144 16
+line 70
+;60:}
+;61:
+;62:
+;63:/*
+;64:==================
+;65:G_TryPushingEntity
+;66:
+;67:Returns qfalse if the move is blocked
+;68:==================
+;69:*/
+;70:qboolean	G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, vec3_t amove ) {
+line 77
+;71:	vec3_t		forward, right, up;
+;72:	vec3_t		org, org2, move2;
+;73:	gentity_t	*block;
+;74:
+;75:	// EF_MOVER_STOP will just stop when contacting another entity
+;76:	// instead of pushing it, but entities can still ride on top of it
+;77:	if ( ( pusher->s.eFlags & EF_MOVER_STOP ) && 
+ADDRLP4 76
+ADDRFP4 4
+INDIRP4
+ASGNP4
+ADDRLP4 76
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRI4
+CNSTI4 1024
+BANDI4
+CNSTI4 0
+EQI4 $79
+ADDRFP4 0
+INDIRP4
+CNSTI4 148
+ADDP4
+INDIRI4
+ADDRLP4 76
+INDIRP4
+INDIRI4
+EQI4 $79
+line 78
+;78:		check->s.groundEntityNum != pusher->s.number ) {
+line 79
+;79:		return qfalse;
+CNSTI4 0
+RETI4
+ADDRGP4 $78
+JUMPV
+LABELV $79
+line 83
+;80:	}
+;81:
+;82:	// save off the old position
+;83:	if (pushed_p > &pushed[MAX_GENTITIES]) {
+ADDRGP4 pushed_p
+INDIRP4
+CVPU4 4
+ADDRGP4 pushed+32768
+CVPU4 4
+LEU4 $81
+line 84
+;84:		G_Error( "pushed_p > &pushed[MAX_GENTITIES]" );
+ADDRGP4 $84
+ARGP4
+ADDRGP4 G_Error
+CALLV
+pop
+line 85
+;85:	}
+LABELV $81
+line 86
+;86:	pushed_p->ent = check;
+ADDRGP4 pushed_p
+INDIRP4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+line 87
+;87:	VectorCopy (check->s.pos.trBase, pushed_p->origin);
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 4
+ADDP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 24
+ADDP4
+INDIRB
+ASGNB 12
+line 88
+;88:	VectorCopy (check->s.apos.trBase, pushed_p->angles);
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 16
+ADDP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 60
+ADDP4
+INDIRB
+ASGNB 12
+line 89
+;89:	if ( check->client ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $85
+line 90
+;90:		pushed_p->deltayaw = check->client->ps.delta_angles[YAW];
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 28
+ADDP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 60
+ADDP4
+INDIRI4
+CVIF4 4
+ASGNF4
+line 91
+;91:		VectorCopy (check->client->ps.origin, pushed_p->origin);
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 4
+ADDP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRB
+ASGNB 12
+line 92
+;92:	}
+LABELV $85
+line 93
+;93:	pushed_p++;
+ADDRLP4 80
+ADDRGP4 pushed_p
+ASGNP4
+ADDRLP4 80
+INDIRP4
+ADDRLP4 80
+INDIRP4
+INDIRP4
+CNSTI4 32
+ADDP4
+ASGNP4
+line 96
+;94:
+;95:	// we need this for pushing things later
+;96:	VectorSubtract (vec3_origin, amove, org);
+ADDRLP4 84
+ADDRFP4 12
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRGP4 vec3_origin
+INDIRF4
+ADDRLP4 84
+INDIRP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRGP4 vec3_origin+4
+INDIRF4
+ADDRLP4 84
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+8
+ADDRGP4 vec3_origin+8
+INDIRF4
+ADDRFP4 12
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 97
+;97:	AngleVectors (org, forward, right, up);
+ADDRLP4 0
+ARGP4
+ADDRLP4 36
+ARGP4
+ADDRLP4 48
+ARGP4
+ADDRLP4 60
+ARGP4
+ADDRGP4 AngleVectors
+CALLV
+pop
+line 100
+;98:
+;99:	// try moving the contacted entity 
+;100:	VectorAdd (check->s.pos.trBase, move, check->s.pos.trBase);
+ADDRLP4 88
+ADDRFP4 0
+INDIRP4
+CNSTI4 24
+ADDP4
+ASGNP4
+ADDRLP4 88
+INDIRP4
+ADDRLP4 88
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 92
+ADDRFP4 0
+INDIRP4
+CNSTI4 28
+ADDP4
+ASGNP4
+ADDRLP4 92
+INDIRP4
+ADDRLP4 92
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 96
+ADDRFP4 0
+INDIRP4
+CNSTI4 32
+ADDP4
+ASGNP4
+ADDRLP4 96
+INDIRP4
+ADDRLP4 96
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 101
+;101:	if (check->client) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $91
+line 103
+;102:		// make sure the client's view rotates when on a rotating mover
+;103:		check->client->ps.delta_angles[YAW] += ANGLE2SHORT(amove[YAW]);
+ADDRLP4 100
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 60
+ADDP4
+ASGNP4
+ADDRLP4 100
+INDIRP4
+ADDRLP4 100
+INDIRP4
+INDIRI4
+CNSTF4 1199570944
+ADDRFP4 12
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+MULF4
+CNSTF4 1135869952
+DIVF4
+CVFI4 4
+CNSTI4 65535
+BANDI4
+ADDI4
+ASGNI4
+line 104
+;104:	}
+LABELV $91
+line 107
+;105:
+;106:	// figure movement due to the pusher's amove
+;107:	VectorSubtract (check->s.pos.trBase, pusher->r.currentOrigin, org);
+ADDRLP4 100
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 104
+ADDRFP4 4
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 100
+INDIRP4
+CNSTI4 24
+ADDP4
+INDIRF4
+ADDRLP4 104
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 100
+INDIRP4
+CNSTI4 28
+ADDP4
+INDIRF4
+ADDRLP4 104
+INDIRP4
+CNSTI4 492
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+8
+ADDRFP4 0
+INDIRP4
+CNSTI4 32
+ADDP4
+INDIRF4
+ADDRFP4 4
+INDIRP4
+CNSTI4 496
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 108
+;108:	org2[0] = DotProduct (org, forward);
+ADDRLP4 24
+ADDRLP4 0
+INDIRF4
+ADDRLP4 36
+INDIRF4
+MULF4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 36+4
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 36+8
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+line 109
+;109:	org2[1] = -DotProduct (org, right);
+ADDRLP4 24+4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 48
+INDIRF4
+MULF4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 48+4
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 48+8
+INDIRF4
+MULF4
+ADDF4
+NEGF4
+ASGNF4
+line 110
+;110:	org2[2] = DotProduct (org, up);
+ADDRLP4 24+8
+ADDRLP4 0
+INDIRF4
+ADDRLP4 60
+INDIRF4
+MULF4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 60+4
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 60+8
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+line 111
+;111:	VectorSubtract (org2, org, move2);
+ADDRLP4 12
+ADDRLP4 24
+INDIRF4
+ADDRLP4 0
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 12+4
+ADDRLP4 24+4
+INDIRF4
+ADDRLP4 0+4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 12+8
+ADDRLP4 24+8
+INDIRF4
+ADDRLP4 0+8
+INDIRF4
+SUBF4
+ASGNF4
+line 112
+;112:	VectorAdd (check->s.pos.trBase, move2, check->s.pos.trBase);
+ADDRLP4 108
+ADDRFP4 0
+INDIRP4
+CNSTI4 24
+ADDP4
+ASGNP4
+ADDRLP4 108
+INDIRP4
+ADDRLP4 108
+INDIRP4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 112
+ADDRFP4 0
+INDIRP4
+CNSTI4 28
+ADDP4
+ASGNP4
+ADDRLP4 112
+INDIRP4
+ADDRLP4 112
+INDIRP4
+INDIRF4
+ADDRLP4 12+4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 116
+ADDRFP4 0
+INDIRP4
+CNSTI4 32
+ADDP4
+ASGNP4
+ADDRLP4 116
+INDIRP4
+ADDRLP4 116
+INDIRP4
+INDIRF4
+ADDRLP4 12+8
+INDIRF4
+ADDF4
+ASGNF4
+line 113
+;113:	if ( check->client ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $117
+line 114
+;114:		VectorAdd (check->client->ps.origin, move, check->client->ps.origin);
+ADDRLP4 120
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+ASGNP4
+ADDRLP4 120
+INDIRP4
+ADDRLP4 120
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 124
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 24
+ADDP4
+ASGNP4
+ADDRLP4 124
+INDIRP4
+ADDRLP4 124
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 128
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 28
+ADDP4
+ASGNP4
+ADDRLP4 128
+INDIRP4
+ADDRLP4 128
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 115
+;115:		VectorAdd (check->client->ps.origin, move2, check->client->ps.origin);
+ADDRLP4 132
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+ASGNP4
+ADDRLP4 132
+INDIRP4
+ADDRLP4 132
+INDIRP4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 136
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 24
+ADDP4
+ASGNP4
+ADDRLP4 136
+INDIRP4
+ADDRLP4 136
+INDIRP4
+INDIRF4
+ADDRLP4 12+4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 140
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 28
+ADDP4
+ASGNP4
+ADDRLP4 140
+INDIRP4
+ADDRLP4 140
+INDIRP4
+INDIRF4
+ADDRLP4 12+8
+INDIRF4
+ADDF4
+ASGNF4
+line 116
+;116:	}
+LABELV $117
+line 119
+;117:
+;118:	// may have pushed them off an edge
+;119:	if ( check->s.groundEntityNum != pusher->s.number ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 148
+ADDP4
+INDIRI4
+ADDRFP4 4
+INDIRP4
+INDIRI4
+EQI4 $121
+line 120
+;120:		check->s.groundEntityNum = -1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 148
+ADDP4
+CNSTI4 -1
+ASGNI4
+line 121
+;121:	}
+LABELV $121
+line 123
+;122:
+;123:	block = G_TestEntityPosition( check );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRLP4 120
+ADDRGP4 G_TestEntityPosition
+CALLP4
+ASGNP4
+ADDRLP4 72
+ADDRLP4 120
+INDIRP4
+ASGNP4
+line 124
+;124:	if (!block) {
+ADDRLP4 72
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $123
+line 126
+;125:		// pushed ok
+;126:		if ( check->client ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $125
+line 127
+;127:			VectorCopy( check->client->ps.origin, check->r.currentOrigin );
+ADDRLP4 124
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 124
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 124
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRB
+ASGNB 12
+line 128
+;128:		} else {
+ADDRGP4 $126
+JUMPV
+LABELV $125
+line 129
+;129:			VectorCopy( check->s.pos.trBase, check->r.currentOrigin );
+ADDRLP4 124
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 124
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 124
+INDIRP4
+CNSTI4 24
+ADDP4
+INDIRB
+ASGNB 12
+line 130
+;130:		}
+LABELV $126
+line 131
+;131:		trap_LinkEntity (check);
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 132
+;132:		return qtrue;
+CNSTI4 1
+RETI4
+ADDRGP4 $78
+JUMPV
+LABELV $123
+line 138
+;133:	}
+;134:
+;135:	// if it is ok to leave in the old position, do it
+;136:	// this is only relevent for riding entities, not pushed
+;137:	// Sliding trapdoors can cause this.
+;138:	VectorCopy( (pushed_p-1)->origin, check->s.pos.trBase);
+ADDRFP4 0
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 -28
+ADDP4
+INDIRB
+ASGNB 12
+line 139
+;139:	if ( check->client ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $127
+line 140
+;140:		VectorCopy( (pushed_p-1)->origin, check->client->ps.origin);
+ADDRFP4 0
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 -28
+ADDP4
+INDIRB
+ASGNB 12
+line 141
+;141:	}
+LABELV $127
+line 142
+;142:	VectorCopy( (pushed_p-1)->angles, check->s.apos.trBase );
+ADDRFP4 0
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 -16
+ADDP4
+INDIRB
+ASGNB 12
+line 143
+;143:	block = G_TestEntityPosition (check);
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRLP4 124
+ADDRGP4 G_TestEntityPosition
+CALLP4
+ASGNP4
+ADDRLP4 72
+ADDRLP4 124
+INDIRP4
+ASGNP4
+line 144
+;144:	if ( !block ) {
+ADDRLP4 72
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $129
+line 145
+;145:		check->s.groundEntityNum = -1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 148
+ADDP4
+CNSTI4 -1
+ASGNI4
+line 146
+;146:		pushed_p--;
+ADDRLP4 128
+ADDRGP4 pushed_p
+ASGNP4
+ADDRLP4 128
+INDIRP4
+ADDRLP4 128
+INDIRP4
+INDIRP4
+CNSTI4 -32
+ADDP4
+ASGNP4
+line 147
+;147:		return qtrue;
+CNSTI4 1
+RETI4
+ADDRGP4 $78
+JUMPV
+LABELV $129
+line 151
+;148:	}
+;149:
+;150:	// blocked
+;151:	return qfalse;
+CNSTI4 0
+RETI4
+LABELV $78
+endproc G_TryPushingEntity 144 16
+export G_MoverPush
+proc G_MoverPush 4228 32
+line 164
+;152:}
+;153:
+;154:
+;155:/*
+;156:============
+;157:G_MoverPush
+;158:
+;159:Objects need to be moved back on a failed push,
+;160:otherwise riders would continue to slide.
+;161:If qfalse is returned, *obstacle will be the blocking entity
+;162:============
+;163:*/
+;164:qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **obstacle ) {
+line 173
+;165:	int			i, e;
+;166:	gentity_t	*check;
+;167:	vec3_t		mins, maxs;
+;168:	pushed_t	*p;
+;169:	int			entityList[MAX_GENTITIES];
+;170:	int			listedEntities;
+;171:	vec3_t		totalMins, totalMaxs;
+;172:
+;173:	*obstacle = NULL;
+ADDRFP4 12
+INDIRP4
+CNSTP4 0
+ASGNP4
+line 178
+;174:
+;175:
+;176:	// mins/maxs are the bounds at the destination
+;177:	// totalMins / totalMaxs are the bounds for the entire move
+;178:	if ( pusher->r.currentAngles[0] || pusher->r.currentAngles[1] || pusher->r.currentAngles[2]
+ADDRLP4 4164
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4168
+CNSTF4 0
+ASGNF4
+ADDRLP4 4164
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRF4
+ADDRLP4 4168
+INDIRF4
+NEF4 $138
+ADDRLP4 4164
+INDIRP4
+CNSTI4 504
+ADDP4
+INDIRF4
+ADDRLP4 4168
+INDIRF4
+NEF4 $138
+ADDRLP4 4164
+INDIRP4
+CNSTI4 508
+ADDP4
+INDIRF4
+ADDRLP4 4168
+INDIRF4
+NEF4 $138
+ADDRLP4 4172
+ADDRFP4 8
+INDIRP4
+ASGNP4
+ADDRLP4 4172
+INDIRP4
+INDIRF4
+ADDRLP4 4168
+INDIRF4
+NEF4 $138
+ADDRLP4 4172
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+ADDRLP4 4168
+INDIRF4
+NEF4 $138
+ADDRLP4 4172
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRF4
+ADDRLP4 4168
+INDIRF4
+EQF4 $132
+LABELV $138
+line 179
+;179:		|| amove[0] || amove[1] || amove[2] ) {
+line 182
+;180:		float		radius;
+;181:
+;182:		radius = RadiusFromBounds( pusher->r.mins, pusher->r.maxs );
+ADDRLP4 4180
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4180
+INDIRP4
+CNSTI4 436
+ADDP4
+ARGP4
+ADDRLP4 4180
+INDIRP4
+CNSTI4 448
+ADDP4
+ARGP4
+ADDRLP4 4184
+ADDRGP4 RadiusFromBounds
+CALLF4
+ASGNF4
+ADDRLP4 4176
+ADDRLP4 4184
+INDIRF4
+ASGNF4
+line 183
+;183:		for ( i = 0 ; i < 3 ; i++ ) {
+ADDRLP4 4
+CNSTI4 0
+ASGNI4
+LABELV $139
+line 184
+;184:			mins[i] = pusher->r.currentOrigin[i] + move[i] - radius;
+ADDRLP4 4188
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4188
+INDIRI4
+ADDRLP4 16
+ADDP4
+ADDRLP4 4188
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 4188
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+ADDF4
+ADDRLP4 4176
+INDIRF4
+SUBF4
+ASGNF4
+line 185
+;185:			maxs[i] = pusher->r.currentOrigin[i] + move[i] + radius;
+ADDRLP4 4192
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4192
+INDIRI4
+ADDRLP4 28
+ADDP4
+ADDRLP4 4192
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 4192
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+ADDF4
+ADDRLP4 4176
+INDIRF4
+ADDF4
+ASGNF4
+line 186
+;186:			totalMins[i] = mins[i] - move[i];
+ADDRLP4 4196
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4196
+INDIRI4
+ADDRLP4 4140
+ADDP4
+ADDRLP4 4196
+INDIRI4
+ADDRLP4 16
+ADDP4
+INDIRF4
+ADDRLP4 4196
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 187
+;187:			totalMaxs[i] = maxs[i] - move[i];
+ADDRLP4 4200
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4200
+INDIRI4
+ADDRLP4 4152
+ADDP4
+ADDRLP4 4200
+INDIRI4
+ADDRLP4 28
+ADDP4
+INDIRF4
+ADDRLP4 4200
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 188
+;188:		}
+LABELV $140
+line 183
+ADDRLP4 4
+ADDRLP4 4
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 3
+LTI4 $139
+line 189
+;189:	} else {
+ADDRGP4 $133
+JUMPV
+LABELV $132
+line 190
+;190:		for (i=0 ; i<3 ; i++) {
+ADDRLP4 4
+CNSTI4 0
+ASGNI4
+LABELV $143
+line 191
+;191:			mins[i] = pusher->r.absmin[i] + move[i];
+ADDRLP4 4176
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4176
+INDIRI4
+ADDRLP4 16
+ADDP4
+ADDRLP4 4176
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 4176
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 192
+;192:			maxs[i] = pusher->r.absmax[i] + move[i];
+ADDRLP4 4180
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4180
+INDIRI4
+ADDRLP4 28
+ADDP4
+ADDRLP4 4180
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 476
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 4180
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 193
+;193:		}
+LABELV $144
+line 190
+ADDRLP4 4
+ADDRLP4 4
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 3
+LTI4 $143
+line 195
+;194:
+;195:		VectorCopy( pusher->r.absmin, totalMins );
+ADDRLP4 4140
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+INDIRB
+ASGNB 12
+line 196
+;196:		VectorCopy( pusher->r.absmax, totalMaxs );
+ADDRLP4 4152
+ADDRFP4 0
+INDIRP4
+CNSTI4 476
+ADDP4
+INDIRB
+ASGNB 12
+line 197
+;197:		for (i=0 ; i<3 ; i++) {
+ADDRLP4 4
+CNSTI4 0
+ASGNI4
+LABELV $147
+line 198
+;198:			if ( move[i] > 0 ) {
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+CNSTF4 0
+LEF4 $151
+line 199
+;199:				totalMaxs[i] += move[i];
+ADDRLP4 4176
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4180
+ADDRLP4 4176
+INDIRI4
+ADDRLP4 4152
+ADDP4
+ASGNP4
+ADDRLP4 4180
+INDIRP4
+ADDRLP4 4180
+INDIRP4
+INDIRF4
+ADDRLP4 4176
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 200
+;200:			} else {
+ADDRGP4 $152
+JUMPV
+LABELV $151
+line 201
+;201:				totalMins[i] += move[i];
+ADDRLP4 4176
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 4180
+ADDRLP4 4176
+INDIRI4
+ADDRLP4 4140
+ADDP4
+ASGNP4
+ADDRLP4 4180
+INDIRP4
+ADDRLP4 4180
+INDIRP4
+INDIRF4
+ADDRLP4 4176
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 202
+;202:			}
+LABELV $152
+line 203
+;203:		}
+LABELV $148
+line 197
+ADDRLP4 4
+ADDRLP4 4
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 3
+LTI4 $147
+line 204
+;204:	}
+LABELV $133
+line 207
+;205:
+;206:	// unlink the pusher so we don't get it in the entityList
+;207:	trap_UnlinkEntity( pusher );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_UnlinkEntity
+CALLV
+pop
+line 209
+;208:
+;209:	listedEntities = trap_EntitiesInBox( totalMins, totalMaxs, entityList, MAX_GENTITIES );
+ADDRLP4 4140
+ARGP4
+ADDRLP4 4152
+ARGP4
+ADDRLP4 40
+ARGP4
+CNSTI4 1024
+ARGI4
+ADDRLP4 4176
+ADDRGP4 trap_EntitiesInBox
+CALLI4
+ASGNI4
+ADDRLP4 4136
+ADDRLP4 4176
+INDIRI4
+ASGNI4
+line 212
+;210:
+;211:	// move the pusher to it's final position
+;212:	VectorAdd( pusher->r.currentOrigin, move, pusher->r.currentOrigin );
+ADDRLP4 4180
+ADDRFP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+ASGNP4
+ADDRLP4 4180
+INDIRP4
+ADDRLP4 4180
+INDIRP4
+INDIRF4
+ADDRFP4 4
+INDIRP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 4184
+ADDRFP4 0
+INDIRP4
+CNSTI4 492
+ADDP4
+ASGNP4
+ADDRLP4 4184
+INDIRP4
+ADDRLP4 4184
+INDIRP4
+INDIRF4
+ADDRFP4 4
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 4188
+ADDRFP4 0
+INDIRP4
+CNSTI4 496
+ADDP4
+ASGNP4
+ADDRLP4 4188
+INDIRP4
+ADDRLP4 4188
+INDIRP4
+INDIRF4
+ADDRFP4 4
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 213
+;213:	VectorAdd( pusher->r.currentAngles, amove, pusher->r.currentAngles );
+ADDRLP4 4192
+ADDRFP4 0
+INDIRP4
+CNSTI4 500
+ADDP4
+ASGNP4
+ADDRLP4 4192
+INDIRP4
+ADDRLP4 4192
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 4196
+ADDRFP4 0
+INDIRP4
+CNSTI4 504
+ADDP4
+ASGNP4
+ADDRLP4 4196
+INDIRP4
+ADDRLP4 4196
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+ADDRLP4 4200
+ADDRFP4 0
+INDIRP4
+CNSTI4 508
+ADDP4
+ASGNP4
+ADDRLP4 4200
+INDIRP4
+ADDRLP4 4200
+INDIRP4
+INDIRF4
+ADDRFP4 8
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 214
+;214:	trap_LinkEntity( pusher );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 217
+;215:
+;216: 	// see if any solid entities are inside the final position
+;217:	for ( e = 0 ; e < listedEntities ; e++ ) {
+ADDRLP4 12
+CNSTI4 0
+ASGNI4
+ADDRGP4 $156
+JUMPV
+LABELV $153
+line 218
+;218:		check = &g_entities[ entityList[ e ] ];
+ADDRLP4 8
+CNSTI4 1108
+ADDRLP4 12
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 40
+ADDP4
+INDIRI4
+MULI4
+ADDRGP4 g_entities
+ADDP4
+ASGNP4
+line 220
+;219:
+;220:		if ( check->s.eFlags & EF_DEAD )
+ADDRLP4 8
+INDIRP4
+CNSTI4 8
+ADDP4
+INDIRI4
+CNSTI4 1
+BANDI4
+CNSTI4 0
+EQI4 $157
+line 221
+;221:			continue;
+ADDRGP4 $154
+JUMPV
+LABELV $157
+line 224
+;222:
+;223:		// only push players
+;224:		if ( check->s.eType != ET_PLAYER || check->health < 0 ) {
+ADDRLP4 8
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $161
+ADDRLP4 8
+INDIRP4
+CNSTI4 732
+ADDP4
+INDIRI4
+CNSTI4 0
+GEI4 $159
+LABELV $161
+line 225
+;225:			continue;
+ADDRGP4 $154
+JUMPV
+LABELV $159
+line 229
+;226:		}
+;227:
+;228:		// if the entity is standing on the pusher, it will definitely be moved
+;229:		if ( check->s.groundEntityNum != pusher->s.number ) {
+ADDRLP4 8
+INDIRP4
+CNSTI4 148
+ADDP4
+INDIRI4
+ADDRFP4 0
+INDIRP4
+INDIRI4
+EQI4 $162
+line 231
+;230:			// see if the ent needs to be tested
+;231:			if ( check->r.absmin[0] >= maxs[0]
+ADDRLP4 8
+INDIRP4
+CNSTI4 464
+ADDP4
+INDIRF4
+ADDRLP4 28
+INDIRF4
+GEF4 $174
+ADDRLP4 8
+INDIRP4
+CNSTI4 468
+ADDP4
+INDIRF4
+ADDRLP4 28+4
+INDIRF4
+GEF4 $174
+ADDRLP4 8
+INDIRP4
+CNSTI4 472
+ADDP4
+INDIRF4
+ADDRLP4 28+8
+INDIRF4
+GEF4 $174
+ADDRLP4 8
+INDIRP4
+CNSTI4 476
+ADDP4
+INDIRF4
+ADDRLP4 16
+INDIRF4
+LEF4 $174
+ADDRLP4 8
+INDIRP4
+CNSTI4 480
+ADDP4
+INDIRF4
+ADDRLP4 16+4
+INDIRF4
+LEF4 $174
+ADDRLP4 8
+INDIRP4
+CNSTI4 484
+ADDP4
+INDIRF4
+ADDRLP4 16+8
+INDIRF4
+GTF4 $164
+LABELV $174
+line 236
+;232:			|| check->r.absmin[1] >= maxs[1]
+;233:			|| check->r.absmin[2] >= maxs[2]
+;234:			|| check->r.absmax[0] <= mins[0]
+;235:			|| check->r.absmax[1] <= mins[1]
+;236:			|| check->r.absmax[2] <= mins[2] ) {
+line 237
+;237:				continue;
+ADDRGP4 $154
+JUMPV
+LABELV $164
+line 241
+;238:			}
+;239:			// see if the ent's bbox is inside the pusher's final position
+;240:			// this does allow a fast moving object to pass through a thin entity...
+;241:			if (!G_TestEntityPosition (check)) {
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRLP4 4212
+ADDRGP4 G_TestEntityPosition
+CALLP4
+ASGNP4
+ADDRLP4 4212
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $175
+line 242
+;242:				continue;
+ADDRGP4 $154
+JUMPV
+LABELV $175
+line 244
+;243:			}
+;244:		}
+LABELV $162
+line 248
+;245: 		 
+;246:		
+;247:		// rotatable doors do not push entities
+;248:		if( !(pusher->flags & FL_ROTATE) )
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 204800
+BANDI4
+CNSTI4 0
+NEI4 $177
+line 249
+;249:		{
+line 251
+;250:			// the entity needs to be pushed
+;251:			if ( G_TryPushingEntity( check, pusher, move, amove ) ) {
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRLP4 4208
+ADDRGP4 G_TryPushingEntity
+CALLI4
+ASGNI4
+ADDRLP4 4208
+INDIRI4
+CNSTI4 0
+EQI4 $179
+line 252
+;252:				continue;
+ADDRGP4 $154
+JUMPV
+LABELV $179
+line 256
+;253:			} 
+;254:	
+;255:			// the move was blocked an entity and we cannot move it so damage it!
+;256:			if ( pusher->damage ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $181
+line 257
+;257:				G_Damage( check, pusher, pusher, NULL, NULL, pusher->damage, 0, MOD_CRUSH ); 
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRLP4 4212
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4212
+INDIRP4
+ARGP4
+ADDRLP4 4212
+INDIRP4
+ARGP4
+ADDRLP4 4216
+CNSTP4 0
+ASGNP4
+ADDRLP4 4216
+INDIRP4
+ARGP4
+ADDRLP4 4216
+INDIRP4
+ARGP4
+ADDRLP4 4212
+INDIRP4
+CNSTI4 740
+ADDP4
+INDIRI4
+ARGI4
+CNSTI4 0
+ARGI4
+CNSTI4 17
+ARGI4
+ADDRGP4 G_Damage
+CALLI4
+pop
+line 258
+;258:			}
+LABELV $181
+line 260
+;259:			// bobbing entities are instant-kill and never get blocked
+;260:			if ( pusher->s.pos.trType == TR_SINE || pusher->s.apos.trType == TR_SINE ) {
+ADDRLP4 4212
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4216
+CNSTI4 4
+ASGNI4
+ADDRLP4 4212
+INDIRP4
+CNSTI4 12
+ADDP4
+INDIRI4
+ADDRLP4 4216
+INDIRI4
+EQI4 $185
+ADDRLP4 4212
+INDIRP4
+CNSTI4 48
+ADDP4
+INDIRI4
+ADDRLP4 4216
+INDIRI4
+NEI4 $183
+LABELV $185
+line 261
+;261:				G_Damage( check, pusher, pusher, NULL, NULL, 99999, 0, MOD_CRUSH );
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRLP4 4220
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4220
+INDIRP4
+ARGP4
+ADDRLP4 4220
+INDIRP4
+ARGP4
+ADDRLP4 4224
+CNSTP4 0
+ASGNP4
+ADDRLP4 4224
+INDIRP4
+ARGP4
+ADDRLP4 4224
+INDIRP4
+ARGP4
+CNSTI4 99999
+ARGI4
+CNSTI4 0
+ARGI4
+CNSTI4 17
+ARGI4
+ADDRGP4 G_Damage
+CALLI4
+pop
+line 262
+;262:				continue;
+ADDRGP4 $154
+JUMPV
+LABELV $183
+line 264
+;263:			} 
+;264:		}
+LABELV $177
+line 266
+;265:		// save off the obstacle so we can call the block function (crush, etc)
+;266:		*obstacle = check;
+ADDRFP4 12
+INDIRP4
+ADDRLP4 8
+INDIRP4
+ASGNP4
+line 271
+;267:
+;268:		// move back any entities we already moved
+;269:		// go backwards, so if the same entity was pushed
+;270:		// twice, it goes back to the original position
+;271:		for ( p=pushed_p-1 ; p>=pushed ; p-- ) {
+ADDRLP4 0
+ADDRGP4 pushed_p
+INDIRP4
+CNSTI4 -32
+ADDP4
+ASGNP4
+ADDRGP4 $189
+JUMPV
+LABELV $186
+line 272
+;272:			VectorCopy (p->origin, p->ent->s.pos.trBase);
+ADDRLP4 0
+INDIRP4
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRB
+ASGNB 12
+line 273
+;273:			VectorCopy (p->angles, p->ent->s.apos.trBase);
+ADDRLP4 0
+INDIRP4
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 16
+ADDP4
+INDIRB
+ASGNB 12
+line 274
+;274:			if ( p->ent->client ) {
+ADDRLP4 0
+INDIRP4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $190
+line 275
+;275:				p->ent->client->ps.delta_angles[YAW] = p->deltayaw;
+ADDRLP4 0
+INDIRP4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 28
+ADDP4
+INDIRF4
+CVFI4 4
+ASGNI4
+line 276
+;276:				VectorCopy (p->origin, p->ent->client->ps.origin);
+ADDRLP4 0
+INDIRP4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 20
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 4
+ADDP4
+INDIRB
+ASGNB 12
+line 277
+;277:			}
+LABELV $190
+line 278
+;278:			trap_LinkEntity (p->ent);
+ADDRLP4 0
+INDIRP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 279
+;279:		}
+LABELV $187
+line 271
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 -32
+ADDP4
+ASGNP4
+LABELV $189
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+ADDRGP4 pushed
+CVPU4 4
+GEU4 $186
+line 280
+;280:		return qfalse; 
+CNSTI4 0
+RETI4
+ADDRGP4 $131
+JUMPV
+LABELV $154
+line 217
+ADDRLP4 12
+ADDRLP4 12
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+LABELV $156
+ADDRLP4 12
+INDIRI4
+ADDRLP4 4136
+INDIRI4
+LTI4 $153
+line 282
+;281:	}
+;282:	return qtrue;
+CNSTI4 1
+RETI4
+LABELV $131
+endproc G_MoverPush 4228 32
+export G_MoverTeam
+proc G_MoverTeam 72 16
+line 291
+;283:}
+;284:
+;285:
+;286:/*
+;287:=================
+;288:G_MoverTeam
+;289:=================
+;290:*/
+;291:void G_MoverTeam( gentity_t *ent ) {
+line 296
+;292:	vec3_t		move, amove;
+;293:	gentity_t	*part, *obstacle;
+;294:	vec3_t		origin, angles; 
+;295:
+;296:	obstacle = NULL; 
+ADDRLP4 52
+CNSTP4 0
+ASGNP4
+line 301
+;297:	
+;298:	// make sure all team slaves can move before commiting
+;299:	// any moves or calling any think functions
+;300:	// if the move is blocked, all moved objects will be backed out
+;301:	pushed_p = pushed;
+ADDRGP4 pushed_p
+ADDRGP4 pushed
+ASGNP4
+line 303
+;302:	
+;303:	for (part = ent ; part ; part=part->teamchain) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRGP4 $196
+JUMPV
+LABELV $193
+line 305
+;304:		// get current position 
+;305:		BG_EvaluateTrajectory( &part->s.pos, level.time, origin );
+ADDRLP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 28
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 306
+;306:		BG_EvaluateTrajectory( &part->s.apos, level.time, angles );
+ADDRLP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 40
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 307
+;307:		VectorSubtract( origin, part->r.currentOrigin, move );
+ADDRLP4 4
+ADDRLP4 28
+INDIRF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 4+4
+ADDRLP4 28+4
+INDIRF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 492
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 4+8
+ADDRLP4 28+8
+INDIRF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 496
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 308
+;308:		VectorSubtract( angles, part->r.currentAngles, amove );
+ADDRLP4 16
+ADDRLP4 40
+INDIRF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 16+4
+ADDRLP4 40+4
+INDIRF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 504
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 16+8
+ADDRLP4 40+8
+INDIRF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 508
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 310
+;309:
+;310:		if ( !G_MoverPush( part, move, amove, &obstacle ) ) {  
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 4
+ARGP4
+ADDRLP4 16
+ARGP4
+ADDRLP4 52
+ARGP4
+ADDRLP4 64
+ADDRGP4 G_MoverPush
+CALLI4
+ASGNI4
+ADDRLP4 64
+INDIRI4
+CNSTI4 0
+NEI4 $207
+line 311
+;311:			break; 
+ADDRGP4 $195
+JUMPV
+LABELV $207
+line 313
+;312:		}
+;313:	} 
+LABELV $194
+line 303
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $196
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $193
+LABELV $195
+line 315
+;314:
+;315:	if (part) {
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $209
+line 317
+;316:		// go back to the previous position
+;317:		for ( part = ent ; part ; part = part->teamchain ) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRGP4 $214
+JUMPV
+LABELV $211
+line 318
+;318:			part->s.pos.trTime += level.time - level.previousTime;
+ADDRLP4 56
+ADDRLP4 0
+INDIRP4
+CNSTI4 16
+ADDP4
+ASGNP4
+ADDRLP4 56
+INDIRP4
+ADDRLP4 56
+INDIRP4
+INDIRI4
+ADDRGP4 level+32
+INDIRI4
+ADDRGP4 level+36
+INDIRI4
+SUBI4
+ADDI4
+ASGNI4
+line 319
+;319:			part->s.apos.trTime += level.time - level.previousTime;
+ADDRLP4 60
+ADDRLP4 0
+INDIRP4
+CNSTI4 52
+ADDP4
+ASGNP4
+ADDRLP4 60
+INDIRP4
+ADDRLP4 60
+INDIRP4
+INDIRI4
+ADDRGP4 level+32
+INDIRI4
+ADDRGP4 level+36
+INDIRI4
+SUBI4
+ADDI4
+ASGNI4
+line 320
+;320:			BG_EvaluateTrajectory( &part->s.pos, level.time, part->r.currentOrigin );
+ADDRLP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 321
+;321:			BG_EvaluateTrajectory( &part->s.apos, level.time, part->r.currentAngles );
+ADDRLP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 500
+ADDP4
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 322
+;322:			trap_LinkEntity( part );
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 323
+;323:		}
+LABELV $212
+line 317
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $214
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $211
+line 326
+;324:
+;325:		// if the pusher has a "blocked" function, call it
+;326:		if (ent->blocked) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 700
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $192
+line 327
+;327:			ent->blocked( ent, obstacle );
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 56
+INDIRP4
+ARGP4
+ADDRLP4 52
+INDIRP4
+ARGP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 700
+ADDP4
+INDIRP4
+CALLV
+pop
+line 328
+;328:		}
+line 329
+;329:		return;
+ADDRGP4 $192
+JUMPV
+LABELV $209
+line 334
+;330:	}
+;331:
+;332:	// the move succeeded
+;333:// KnighthawK: rotating doors
+;334:	for ( part = ent ; part ; part = part->teamchain ) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRGP4 $226
+JUMPV
+LABELV $223
+line 338
+;335:		// call the reached function if time is at or past end point
+;336:
+;337:		// rotating doors
+;338:		if( !strcmp( ent->classname , "func_door_rotate" ) ){
+ADDRFP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $229
+ARGP4
+ADDRLP4 56
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 56
+INDIRI4
+CNSTI4 0
+NEI4 $227
+line 339
+;339:			if( part->s.apos.trType == TR_LINEAR_STOP ) {
+ADDRLP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+INDIRI4
+CNSTI4 3
+NEI4 $228
+line 340
+;340:				if ( level.time >= part->s.apos.trTime + part->s.apos.trDuration ) {
+ADDRGP4 level+32
+INDIRI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 52
+ADDP4
+INDIRI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+ADDI4
+LTI4 $228
+line 341
+;341:					if ( part->reached ) {
+ADDRLP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $228
+line 342
+;342:						part->reached( part );
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+INDIRP4
+CALLV
+pop
+line 343
+;343:					}
+line 344
+;344:				}
+line 345
+;345:			} // doors
+line 346
+;346:		} else if ( part->s.pos.trType == TR_LINEAR_STOP ) {
+ADDRGP4 $228
+JUMPV
+LABELV $227
+ADDRLP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+INDIRI4
+CNSTI4 3
+NEI4 $237
+line 347
+;347:			if ( level.time >= part->s.pos.trTime + part->s.pos.trDuration ) {
+ADDRGP4 level+32
+INDIRI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 16
+ADDP4
+INDIRI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+ADDI4
+LTI4 $239
+line 348
+;348:				if ( part->reached ) {
+ADDRLP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $242
+line 349
+;349:					part->reached( part );
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+INDIRP4
+CALLV
+pop
+line 350
+;350:				}
+LABELV $242
+line 351
+;351:			}
+LABELV $239
+line 352
+;352:		}
+LABELV $237
+LABELV $228
+line 353
+;353:	}
+LABELV $224
+line 334
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $226
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $223
+line 354
+;354:}
+LABELV $192
+endproc G_MoverTeam 72 16
+export G_RunMover
+proc G_RunMover 8 4
+line 362
+;355: 
+;356:/*
+;357:================
+;358:G_RunMover
+;359:
+;360:================
+;361:*/
+;362:void G_RunMover( gentity_t *ent ) {
+line 365
+;363:	// if not a team captain, don't do anything, because
+;364:	// the captain will handle everything
+;365:	if ( ent->flags & FL_TEAMSLAVE ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 1024
+BANDI4
+CNSTI4 0
+EQI4 $245
+line 366
+;366:		return;
+ADDRGP4 $244
+JUMPV
+LABELV $245
+line 370
+;367:	}
+;368:
+;369:	// if stationary at one of the positions, don't move anything
+;370:	if ( ent->s.pos.trType != TR_STATIONARY || ent->s.apos.trType != TR_STATIONARY ) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+CNSTI4 0
+ASGNI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+INDIRI4
+ADDRLP4 4
+INDIRI4
+NEI4 $249
+ADDRLP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+INDIRI4
+ADDRLP4 4
+INDIRI4
+EQI4 $247
+LABELV $249
+line 371
+;371:		G_MoverTeam( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_MoverTeam
+CALLV
+pop
+line 372
+;372:	}
+LABELV $247
+line 375
+;373: 
+;374:	// check think function
+;375:	G_RunThink( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_RunThink
+CALLV
+pop
+line 376
+;376:}
+LABELV $244
+endproc G_RunMover 8 4
+export SetMoverState
+proc SetMoverState 80 12
+line 392
+;377:
+;378:/*
+;379:============================================================================
+;380:
+;381:GENERAL MOVERS
+;382:
+;383:Doors, plats, and buttons are all binary (two position) movers
+;384:Pos1 is "at rest", pos2 is "activated"
+;385:============================================================================
+;386:*/
+;387:/*
+;388:===============
+;389:SetMoverState
+;390:===============
+;391:*/
+;392:void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
+line 396
+;393:	vec3_t			delta;
+;394:	float			f;
+;395:
+;396:	ent->moverState = moverState;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+ADDRFP4 4
+INDIRI4
+ASGNI4
+line 397
+;397:	ent->s.pos.trTime = time;
+ADDRFP4 0
+INDIRP4
+CNSTI4 16
+ADDP4
+ADDRFP4 8
+INDIRI4
+ASGNI4
+line 400
+;398:
+;399:	// rotatable doors
+;400:	if( ent->flags & FL_ROTATE )
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 204800
+BANDI4
+CNSTI4 0
+EQI4 $251
+line 401
+;401:	{
+line 402
+;402:		ent->s.apos.trTime = time;
+ADDRFP4 0
+INDIRP4
+CNSTI4 52
+ADDP4
+ADDRFP4 8
+INDIRI4
+ASGNI4
+line 404
+;403:
+;404:		switch( moverState ) {
+ADDRLP4 16
+ADDRFP4 4
+INDIRI4
+ASGNI4
+ADDRLP4 16
+INDIRI4
+CNSTI4 0
+LTI4 $253
+ADDRLP4 16
+INDIRI4
+CNSTI4 5
+GTI4 $253
+ADDRLP4 16
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRGP4 $278
+ADDP4
+INDIRP4
+JUMPV
+lit
+align 4
+LABELV $278
+address $256
+address $257
+address $258
+address $263
+address $268
+address $273
+code
+LABELV $256
+line 406
+;405:			case MOVER_POS1:
+;406:				VectorCopy( ent->s.angles, ent->s.apos.trBase );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRB
+ASGNB 12
+line 407
+;407:				ent->s.apos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 0
+ASGNI4
+line 408
+;408:				break;
+ADDRGP4 $254
+JUMPV
+LABELV $257
+line 410
+;409:			case MOVER_POS2:
+;410:				VectorCopy( ent->s.angles2, ent->s.apos.trBase );
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRB
+ASGNB 12
+line 411
+;411:				ent->s.apos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 0
+ASGNI4
+line 412
+;412:				break;
+ADDRGP4 $254
+JUMPV
+LABELV $258
+line 414
+;413:			case MOVER_1TO2:
+;414:				VectorCopy( ent->s.angles, ent->s.apos.trBase ) ;
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRB
+ASGNB 12
+line 415
+;415:				VectorSubtract( ent->s.angles2, ent->s.angles, delta );
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 36
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 36
+INDIRP4
+CNSTI4 132
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 120
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 40
+INDIRP4
+CNSTI4 136
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 124
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 416
+;416:				f = 1000.0 / ent->s.apos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 417
+;417:				VectorScale( delta, f, ent->s.apos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 72
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 76
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 418
+;418:				ent->s.apos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 3
+ASGNI4
+line 419
+;419:				break;
+ADDRGP4 $254
+JUMPV
+LABELV $263
+line 421
+;420:			case MOVER_2TO1:
+;421:				VectorCopy( ent->s.angles2, ent->s.apos.trBase ) ;
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRB
+ASGNB 12
+line 422
+;422:				VectorSubtract( ent->s.angles, ent->s.angles2, delta );
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 48
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRF4
+ADDRLP4 48
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 48
+INDIRP4
+CNSTI4 120
+ADDP4
+INDIRF4
+ADDRLP4 48
+INDIRP4
+CNSTI4 132
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 52
+INDIRP4
+CNSTI4 124
+ADDP4
+INDIRF4
+ADDRLP4 52
+INDIRP4
+CNSTI4 136
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 423
+;423:				f = 1000.0 / ent->s.apos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 424
+;424:				VectorScale( delta, f, ent->s.apos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 72
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 76
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 425
+;425:				ent->s.apos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 3
+ASGNI4
+line 426
+;426:				break;
+ADDRGP4 $254
+JUMPV
+LABELV $268
+line 428
+;427:			case MOVER_STOP_1TO2: 
+;428:				VectorCopy( ent->r.currentAngles , ent->s.apos.trBase ) ;
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRB
+ASGNB 12
+line 429
+;429:				VectorSubtract( ent->s.angles2, ent->r.currentAngles, delta );
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 60
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 60
+INDIRP4
+CNSTI4 132
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 504
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 64
+INDIRP4
+CNSTI4 136
+ADDP4
+INDIRF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 508
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 430
+;430:				f = 1000.0 / ent->s.apos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 431
+;431:				VectorScale( delta, f, ent->s.apos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 72
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 76
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 432
+;432:				ent->moverState = MOVER_1TO2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 2
+ASGNI4
+line 433
+;433:				ent->s.apos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 3
+ASGNI4
+line 434
+;434:				break;
+ADDRGP4 $254
+JUMPV
+LABELV $273
+line 436
+;435:			case MOVER_STOP_2TO1: 
+;436:				VectorCopy( ent->r.currentAngles , ent->s.apos.trBase ) ;
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRB
+ASGNB 12
+line 437
+;437:				VectorSubtract( ent->s.angles, ent->r.currentAngles, delta );
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 72
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 72
+INDIRP4
+CNSTI4 120
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 504
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 76
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 76
+INDIRP4
+CNSTI4 124
+ADDP4
+INDIRF4
+ADDRLP4 76
+INDIRP4
+CNSTI4 508
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 438
+;438:				f = 1000.0 / ent->s.apos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 439
+;439:				VectorScale( delta, f, ent->s.apos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 72
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 76
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 440
+;440:				ent->moverState = MOVER_2TO1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 3
+ASGNI4
+line 441
+;441:				ent->s.apos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 3
+ASGNI4
+line 442
+;442:				break;
+LABELV $253
+LABELV $254
+line 444
+;443:		}
+;444:		BG_EvaluateTrajectory( &ent->s.apos, time, ent->r.currentAngles );	
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 48
+ADDP4
+ARGP4
+ADDRFP4 8
+INDIRI4
+ARGI4
+ADDRLP4 24
+INDIRP4
+CNSTI4 500
+ADDP4
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 446
+;445:
+;446:	}
+LABELV $251
+line 449
+;447:
+;448:
+;449:	switch( moverState ) {
+ADDRLP4 16
+ADDRFP4 4
+INDIRI4
+ASGNI4
+ADDRLP4 16
+INDIRI4
+CNSTI4 0
+LTI4 $279
+ADDRLP4 16
+INDIRI4
+CNSTI4 5
+GTI4 $279
+ADDRLP4 16
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRGP4 $304
+ADDP4
+INDIRP4
+JUMPV
+lit
+align 4
+LABELV $304
+address $282
+address $283
+address $284
+address $289
+address $294
+address $299
+code
+LABELV $282
+line 451
+;450:		case MOVER_POS1:
+;451:			VectorCopy( ent->pos1, ent->s.pos.trBase );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 452
+;452:			ent->s.pos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 0
+ASGNI4
+line 453
+;453:			break;
+ADDRGP4 $280
+JUMPV
+LABELV $283
+line 455
+;454:		case MOVER_POS2:
+;455:			VectorCopy( ent->pos2, ent->s.pos.trBase );
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 456
+;456:			ent->s.pos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 0
+ASGNI4
+line 457
+;457:			break;
+ADDRGP4 $280
+JUMPV
+LABELV $284
+line 459
+;458:		case MOVER_1TO2:
+;459:			VectorCopy( ent->pos1, ent->s.pos.trBase );
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 460
+;460:			VectorSubtract( ent->pos2, ent->pos1, delta );
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 36
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 36
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 40
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 461
+;461:			f = 1000.0 / ent->s.pos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 462
+;462:			VectorScale( delta, f, ent->s.pos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 463
+;463:			ent->s.pos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 3
+ASGNI4
+line 464
+;464:			break;
+ADDRGP4 $280
+JUMPV
+LABELV $289
+line 466
+;465:		case MOVER_2TO1:
+;466:			VectorCopy( ent->pos2, ent->s.pos.trBase );
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 467
+;467:			VectorSubtract( ent->pos1, ent->pos2, delta );
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 48
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+ADDRLP4 48
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 48
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+ADDRLP4 48
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 52
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+ADDRLP4 52
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 468
+;468:			f = 1000.0 / ent->s.pos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 469
+;469:			VectorScale( delta, f, ent->s.pos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 470
+;470:			ent->s.pos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 3
+ASGNI4
+line 471
+;471:			break;
+ADDRGP4 $280
+JUMPV
+LABELV $294
+line 474
+;472:
+;473:		case MOVER_STOP_1TO2:
+;474:			VectorCopy( ent->r.currentOrigin, ent->s.pos.trBase );
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRB
+ASGNB 12
+line 475
+;475:			VectorSubtract( ent->pos2, ent->r.currentOrigin, delta );
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 60
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 60
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 492
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 64
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 496
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 476
+;476:			f = 1000.0 / ent->s.pos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 477
+;477:			VectorScale( delta, f, ent->s.pos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 478
+;478:			ent->moverState = MOVER_1TO2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 2
+ASGNI4
+line 479
+;479:			ent->s.pos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 3
+ASGNI4
+line 480
+;480:			break;
+ADDRGP4 $280
+JUMPV
+LABELV $299
+line 482
+;481:		case MOVER_STOP_2TO1:
+;482:			VectorCopy( ent->r.currentOrigin, ent->s.pos.trBase );
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRB
+ASGNB 12
+line 483
+;483:			VectorSubtract( ent->pos1, ent->r.currentOrigin, delta );
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 72
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 72
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 492
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 76
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 76
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+ADDRLP4 76
+INDIRP4
+CNSTI4 496
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 484
+;484:			f = 1000.0 / ent->s.pos.trDuration;
+ADDRLP4 12
+CNSTF4 1148846080
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CVIF4 4
+DIVF4
+ASGNF4
+line 485
+;485:			VectorScale( delta, f, ent->s.pos.trDelta );
+ADDRFP4 0
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+ADDRFP4 0
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ASGNF4
+line 486
+;486:			ent->moverState = MOVER_2TO1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 3
+ASGNI4
+line 487
+;487:			ent->s.pos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 3
+ASGNI4
+line 488
+;488:			break;
+LABELV $279
+LABELV $280
+line 490
+;489:	}
+;490:	BG_EvaluateTrajectory( &ent->s.pos, level.time, ent->r.currentOrigin );	
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 12
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 24
+INDIRP4
+CNSTI4 488
+ADDP4
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 491
+;491:	trap_LinkEntity( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 492
+;492:}
+LABELV $250
+endproc SetMoverState 80 12
+export MatchTeam
+proc MatchTeam 4 12
+line 504
+;493:
+;494:
+;495:
+;496:/*
+;497:================
+;498:MatchTeam
+;499:
+;500:All entities in a mover team will move from pos1 to pos2
+;501:in the same amount of time
+;502:================
+;503:*/
+;504:void MatchTeam( gentity_t *teamLeader, int moverState, int time ) {
+line 507
+;505:	gentity_t		*slave;
+;506:
+;507:	for ( slave = teamLeader ; slave ; slave = slave->teamchain ) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRGP4 $310
+JUMPV
+LABELV $307
+line 508
+;508:		SetMoverState( slave, moverState, time );
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRI4
+ARGI4
+ADDRFP4 8
+INDIRI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 509
+;509:	}
+LABELV $308
+line 507
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $310
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $307
+line 510
+;510:}
+LABELV $306
+endproc MatchTeam 4 12
+export ReturnToPos1
+proc ReturnToPos1 8 12
+line 519
+;511:
+;512:
+;513:
+;514:/*
+;515:================
+;516:ReturnToPos1
+;517:================
+;518:*/
+;519:void ReturnToPos1( gentity_t *ent ) {
+line 520
+;520:	MatchTeam( ent, MOVER_2TO1, level.time );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 3
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 523
+;521:
+;522:	// looping sound
+;523:	ent->s.loopSound = ent->soundLoop;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 526
+;524:
+;525:	// starting sound
+;526:	if ( ent->sound2to1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $313
+line 527
+;527:		G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 4
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+line 528
+;528:	}
+LABELV $313
+line 529
+;529:}
+LABELV $311
+endproc ReturnToPos1 8 12
+export Reached_BinaryMover
+proc Reached_BinaryMover 32 12
+line 537
+;530:
+;531:
+;532:/*
+;533:================
+;534:Reached_BinaryMover
+;535:================
+;536:*/
+;537:void Reached_BinaryMover( gentity_t *ent ) {
+line 540
+;538:
+;539:	// stop the looping sound
+;540:	ent->s.loopSound = ent->soundLoop;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 543
+;541:
+;542:	// toggle the open state of doors
+;543:	if (strcmp(ent->classname, "func_door")) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $318
+ARGP4
+ADDRLP4 4
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 0
+EQI4 $316
+line 544
+;544:		ent->bot_chattime = !ent->bot_chattime;
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+CNSTI4 1088
+ADDP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+INDIRI4
+CNSTI4 0
+NEI4 $320
+ADDRLP4 8
+CNSTI4 1
+ASGNI4
+ADDRGP4 $321
+JUMPV
+LABELV $320
+ADDRLP4 8
+CNSTI4 0
+ASGNI4
+LABELV $321
+ADDRLP4 12
+INDIRP4
+ADDRLP4 8
+INDIRI4
+ASGNI4
+line 545
+;545:	}
+LABELV $316
+line 547
+;546:
+;547:	if ( ent->moverState == MOVER_1TO2 ||
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ASGNI4
+ADDRLP4 8
+INDIRI4
+CNSTI4 2
+EQI4 $324
+ADDRLP4 8
+INDIRI4
+CNSTI4 4
+NEI4 $322
+LABELV $324
+line 548
+;548:		ent->moverState == MOVER_STOP_1TO2 ) {
+line 550
+;549:		// reached pos2
+;550:		SetMoverState( ent, MOVER_POS2, level.time );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 1
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 553
+;551:
+;552:		// play sound
+;553:		if ( ent->soundPos2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 592
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $326
+line 555
+;554:
+;555:			if ( ent->activator && ent->activator->client && ent->activator->client->pers.nsPC.stealth < 4 )
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 16
+CNSTU4 0
+ASGNU4
+ADDRLP4 12
+INDIRP4
+CVPU4 4
+ADDRLP4 16
+INDIRU4
+EQU4 $328
+ADDRLP4 20
+ADDRLP4 12
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 20
+INDIRP4
+CVPU4 4
+ADDRLP4 16
+INDIRU4
+EQU4 $328
+ADDRLP4 20
+INDIRP4
+CNSTI4 1544
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $328
+line 556
+;556:			G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos2 );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 24
+INDIRP4
+CNSTI4 592
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $328
+line 557
+;557:		}
+LABELV $326
+line 560
+;558:
+;559:		// return to pos1 after a delay
+;560:		ent->think = ReturnToPos1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 ReturnToPos1
+ASGNP4
+line 561
+;561:		if( ent->wait != -1 ) // KnighthawK rotating doors: dont go back if this is set
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 3212836864
+EQF4 $330
+line 562
+;562:			ent->nextthink = level.time + ent->wait;
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CVIF4 4
+ADDRLP4 12
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+ADDF4
+CVFI4 4
+ASGNI4
+LABELV $330
+line 565
+;563:
+;564:		// fire targets
+;565:		if ( !ent->activator ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $333
+line 566
+;566:			ent->activator = ent;
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 772
+ADDP4
+ADDRLP4 16
+INDIRP4
+ASGNP4
+line 567
+;567:		}
+LABELV $333
+line 568
+;568:		G_UseTargets( ent, ent->activator );
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+ARGP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 772
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 G_UseTargets
+CALLV
+pop
+line 569
+;569:	} else if ( ent->moverState == MOVER_2TO1 ||
+ADDRGP4 $323
+JUMPV
+LABELV $322
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ASGNI4
+ADDRLP4 12
+INDIRI4
+CNSTI4 3
+EQI4 $337
+ADDRLP4 12
+INDIRI4
+CNSTI4 5
+NEI4 $335
+LABELV $337
+line 570
+;570:		ent->moverState == MOVER_STOP_2TO1 ) {
+line 572
+;571:		// reached pos1
+;572:		SetMoverState( ent, MOVER_POS1, level.time );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 0
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 575
+;573:
+;574:		// play sound
+;575:		if ( ent->soundPos1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 580
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $339
+line 576
+;576:			if ( ent->activator && ent->activator->client && ent->activator->client->pers.nsPC.stealth < 4 )
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 20
+CNSTU4 0
+ASGNU4
+ADDRLP4 16
+INDIRP4
+CVPU4 4
+ADDRLP4 20
+INDIRU4
+EQU4 $341
+ADDRLP4 24
+ADDRLP4 16
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CVPU4 4
+ADDRLP4 20
+INDIRU4
+EQU4 $341
+ADDRLP4 24
+INDIRP4
+CNSTI4 1544
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $341
+line 577
+;577:				G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos1 );
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 28
+INDIRP4
+CNSTI4 580
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $341
+line 578
+;578:		}
+LABELV $339
+line 581
+;579:
+;580:		// close areaportals
+;581:		if ( ent->teammaster == ent || !ent->teammaster ) {
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 20
+ADDRLP4 16
+INDIRP4
+CNSTI4 780
+ADDP4
+INDIRP4
+CVPU4 4
+ASGNU4
+ADDRLP4 20
+INDIRU4
+ADDRLP4 16
+INDIRP4
+CVPU4 4
+EQU4 $345
+ADDRLP4 20
+INDIRU4
+CNSTU4 0
+NEU4 $336
+LABELV $345
+line 582
+;582:			trap_AdjustAreaPortalState( ent, qfalse );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 0
+ARGI4
+ADDRGP4 trap_AdjustAreaPortalState
+CALLV
+pop
+line 583
+;583:		}
+line 584
+;584:	} else {
+ADDRGP4 $336
+JUMPV
+LABELV $335
+line 585
+;585:		G_Error( "Reached_BinaryMover: bad moverState" );
+ADDRGP4 $346
+ARGP4
+ADDRGP4 G_Error
+CALLV
+pop
+line 586
+;586:	}
+LABELV $336
+LABELV $323
+line 587
+;587:}
+LABELV $315
+endproc Reached_BinaryMover 32 12
+export Use_BinaryMover
+proc Use_BinaryMover 36 12
+line 594
+;588: 
+;589:/*
+;590:================
+;591:Use_BinaryMover
+;592:================
+;593:*/
+;594:void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
+line 599
+;595:	int		total;
+;596:	int		partial;
+;597:
+;598:	// only the master should be used
+;599:	if ( ent->flags & FL_TEAMSLAVE ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 1024
+BANDI4
+CNSTI4 0
+EQI4 $348
+line 600
+;600:		Use_BinaryMover( ent->teammaster, other, activator );
+ADDRFP4 0
+INDIRP4
+CNSTI4 780
+ADDP4
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 601
+;601:		return;
+ADDRGP4 $347
+JUMPV
+LABELV $348
+line 604
+;602:	}
+;603:
+;604:	ent->activator = activator;
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+ADDRFP4 8
+INDIRP4
+ASGNP4
+line 606
+;605:  
+;606:	if ( ent->moverState == MOVER_STOP_1TO2 || 
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ASGNI4
+ADDRLP4 8
+INDIRI4
+CNSTI4 4
+EQI4 $352
+ADDRLP4 8
+INDIRI4
+CNSTI4 5
+NEI4 $350
+LABELV $352
+line 607
+;607:		ent->moverState == MOVER_STOP_2TO1 ) {
+line 610
+;608:		// start moving 50 msec later, becase if this was player
+;609:		// triggered, level.time hasn't been advanced yet
+;610:		MatchTeam( ent, ent->moverState , level.time );
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+ARGP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 613
+;611:  
+;612:		// looping sound
+;613:		ent->s.loopSound = ent->soundLoop; 
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 614
+;614:		return;
+ADDRGP4 $347
+JUMPV
+LABELV $350
+line 618
+;615:	}
+;616:
+;617:
+;618:	if ( ent->moverState == MOVER_POS1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $354
+line 621
+;619:		// start moving 50 msec later, becase if this was player
+;620:		// triggered, level.time hasn't been advanced yet
+;621:		MatchTeam( ent, MOVER_1TO2, level.time + 50 );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 2
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 624
+;622:
+;623:		// starting sound
+;624:		if ( ent->sound1to2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $357
+line 625
+;625:			if ( ent->elevator_index >= 0) 
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+INDIRI4
+CNSTI4 0
+LTI4 $359
+line 626
+;626:				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 12
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+ADDRGP4 $360
+JUMPV
+LABELV $359
+line 627
+;627:			else if ( other->client && other->client->ps.stats[STAT_STEALTH] < 4)
+ADDRLP4 16
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $361
+ADDRLP4 16
+INDIRP4
+CNSTI4 228
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $361
+line 628
+;628:				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 20
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 20
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $361
+LABELV $360
+line 629
+;629:		}
+LABELV $357
+line 632
+;630:
+;631:		// looping sound
+;632:		ent->s.loopSound = ent->soundLoop;
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 635
+;633:
+;634:		// open areaportal
+;635:		if ( ent->teammaster == ent || !ent->teammaster ) {
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 20
+ADDRLP4 16
+INDIRP4
+CNSTI4 780
+ADDP4
+INDIRP4
+CVPU4 4
+ASGNU4
+ADDRLP4 20
+INDIRU4
+ADDRLP4 16
+INDIRP4
+CVPU4 4
+EQU4 $365
+ADDRLP4 20
+INDIRU4
+CNSTU4 0
+NEU4 $347
+LABELV $365
+line 636
+;636:			trap_AdjustAreaPortalState( ent, qtrue );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 1
+ARGI4
+ADDRGP4 trap_AdjustAreaPortalState
+CALLV
+pop
+line 637
+;637:		}
+line 638
+;638:		return;
+ADDRGP4 $347
+JUMPV
+LABELV $354
+line 645
+;639:	}
+;640:
+;641:// KnighthawK: rotatable doors - special state for the door when it waits to go back
+;642:
+;643:	// if all the way up, just delay before coming down
+;644:
+;645:	if( ent->moverState == MOVER_POS2 && ent->wait == -1 ) {
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $366
+ADDRLP4 12
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 3212836864
+NEF4 $366
+line 648
+;646:		// start moving 50 msec later, becase if this was player
+;647:		// triggered, level.time hasn't been advanced yet
+;648:		MatchTeam( ent, MOVER_2TO1, level.time + 50 );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 3
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 651
+;649:		
+;650:		// starting sound
+;651:		if ( ent->sound2to1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $369
+line 652
+;652:			if ( ent->elevator_index >= 0) 
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+INDIRI4
+CNSTI4 0
+LTI4 $371
+line 653
+;653:				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 16
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+ADDRGP4 $372
+JUMPV
+LABELV $371
+line 654
+;654:			else if ( other->client && other->client->ps.stats[STAT_STEALTH] < 4)
+ADDRLP4 20
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 20
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $373
+ADDRLP4 20
+INDIRP4
+CNSTI4 228
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $373
+line 655
+;655:			G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 24
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $373
+LABELV $372
+line 656
+;656:		}
+LABELV $369
+line 659
+;657:
+;658:		// looping sound
+;659:		ent->s.loopSound = ent->soundLoop;
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 662
+;660:
+;661:		// open areaportal
+;662:		if ( ent->teammaster == ent || !ent->teammaster ) {
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+ADDRLP4 20
+INDIRP4
+CNSTI4 780
+ADDP4
+INDIRP4
+CVPU4 4
+ASGNU4
+ADDRLP4 24
+INDIRU4
+ADDRLP4 20
+INDIRP4
+CVPU4 4
+EQU4 $377
+ADDRLP4 24
+INDIRU4
+CNSTU4 0
+NEU4 $347
+LABELV $377
+line 663
+;663:			trap_AdjustAreaPortalState( ent, qtrue );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 1
+ARGI4
+ADDRGP4 trap_AdjustAreaPortalState
+CALLV
+pop
+line 664
+;664:		}
+line 665
+;665:		return;
+ADDRGP4 $347
+JUMPV
+LABELV $366
+line 666
+;666:	} else if ( ent->moverState == MOVER_POS2 && ent->wait != -1 ) { // this is for making the door stay up
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $378
+ADDRLP4 16
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 3212836864
+EQF4 $378
+line 667
+;667:		ent->nextthink = level.time + ent->wait;
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 20
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CVIF4 4
+ADDRLP4 20
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+ADDF4
+CVFI4 4
+ASGNI4
+line 668
+;668:		return;
+ADDRGP4 $347
+JUMPV
+LABELV $378
+line 672
+;669:	}
+;670:// KnighthawK.
+;671:	// only partway down before reversing
+;672:	if ( ent->moverState == MOVER_2TO1 ) 
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 3
+NEI4 $381
+line 673
+;673:	{
+line 675
+;674:// KnighthawK: rotatable doors
+;675:		if( ! strcmp(ent->classname , "func_door_rotate" ) ) 
+ADDRFP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $229
+ARGP4
+ADDRLP4 20
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 20
+INDIRI4
+CNSTI4 0
+NEI4 $383
+line 676
+;676:			total = ent->s.apos.trDuration;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+ASGNI4
+ADDRGP4 $384
+JUMPV
+LABELV $383
+line 679
+;677:		else
+;678:// KnighthawK.
+;679:			total = ent->s.pos.trDuration;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+ASGNI4
+LABELV $384
+line 681
+;680:
+;681:		partial = level.time - ent->s.time; 
+ADDRLP4 4
+ADDRGP4 level+32
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 84
+ADDP4
+INDIRI4
+SUBI4
+ASGNI4
+line 683
+;682:
+;683:		if ( partial > total )
+ADDRLP4 4
+INDIRI4
+ADDRLP4 0
+INDIRI4
+LEI4 $386
+line 684
+;684:			partial = total; 
+ADDRLP4 4
+ADDRLP4 0
+INDIRI4
+ASGNI4
+LABELV $386
+line 686
+;685:		
+;686:		if( !(ent->flags & FL_OPENDOOR )) // KnighthawK: rotatable doors
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 90112
+BANDI4
+CNSTI4 0
+NEI4 $388
+line 687
+;687:			MatchTeam( ent, MOVER_1TO2, level.time - ( total - partial ) );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 2
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ADDRLP4 0
+INDIRI4
+ADDRLP4 4
+INDIRI4
+SUBI4
+SUBI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+ADDRGP4 $389
+JUMPV
+LABELV $388
+line 689
+;688:		else 
+;689:			SetMoverState(ent, MOVER_1TO2, level.time - ( total - partial ) );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 2
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ADDRLP4 0
+INDIRI4
+ADDRLP4 4
+INDIRI4
+SUBI4
+SUBI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+LABELV $389
+line 691
+;690:
+;691:		if ( ent->sound1to2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $347
+line 692
+;692:			if ( ent->elevator_index >= 0) 
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+INDIRI4
+CNSTI4 0
+LTI4 $394
+line 693
+;693:				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 24
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+ADDRGP4 $347
+JUMPV
+LABELV $394
+line 694
+;694:			else if ( other->client && other->client->ps.stats[STAT_STEALTH] < 4)
+ADDRLP4 28
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $347
+ADDRLP4 28
+INDIRP4
+CNSTI4 228
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $347
+line 695
+;695:			G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 32
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+line 696
+;696:		}
+line 697
+;697:		return;
+ADDRGP4 $347
+JUMPV
+LABELV $381
+line 701
+;698:	}
+;699:
+;700:	// only partway up before reversing
+;701:	if ( ent->moverState == MOVER_1TO2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 2
+NEI4 $398
+line 703
+;702:// KnighthawK: rotatable doors
+;703:		if( !strcmp ( ent->classname , "func_door_rotate" ) )
+ADDRFP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $229
+ARGP4
+ADDRLP4 20
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 20
+INDIRI4
+CNSTI4 0
+NEI4 $400
+line 704
+;704:			total = ent->s.apos.trDuration;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+ASGNI4
+ADDRGP4 $401
+JUMPV
+LABELV $400
+line 706
+;705:		else
+;706:			total = ent->s.pos.trDuration;		
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+ASGNI4
+LABELV $401
+line 708
+;707:// KnighthawK.
+;708:		partial = level.time - ent->s.time;
+ADDRLP4 4
+ADDRGP4 level+32
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 84
+ADDP4
+INDIRI4
+SUBI4
+ASGNI4
+line 709
+;709:		if ( partial > total ) {
+ADDRLP4 4
+INDIRI4
+ADDRLP4 0
+INDIRI4
+LEI4 $403
+line 710
+;710:			partial = total;
+ADDRLP4 4
+ADDRLP4 0
+INDIRI4
+ASGNI4
+line 711
+;711:		}  
+LABELV $403
+line 713
+;712:		
+;713:		if( !(ent->flags & FL_OPENDOOR )) // KnighthawK: rotatable doors
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 90112
+BANDI4
+CNSTI4 0
+NEI4 $405
+line 714
+;714:			MatchTeam( ent, MOVER_2TO1, level.time - ( total - partial ) );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 3
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ADDRLP4 0
+INDIRI4
+ADDRLP4 4
+INDIRI4
+SUBI4
+SUBI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+ADDRGP4 $406
+JUMPV
+LABELV $405
+line 716
+;715:		else
+;716:			SetMoverState(ent, MOVER_2TO1, level.time - ( total - partial ) );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 3
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ADDRLP4 0
+INDIRI4
+ADDRLP4 4
+INDIRI4
+SUBI4
+SUBI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+LABELV $406
+line 718
+;717:
+;718:		if ( ent->sound2to1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $347
+line 719
+;719:			if ( ent->elevator_index >= 0) 
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+INDIRI4
+CNSTI4 0
+LTI4 $411
+line 720
+;720:				G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 24
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+ADDRGP4 $347
+JUMPV
+LABELV $411
+line 721
+;721:			else if ( other->client && other->client->ps.stats[STAT_STEALTH] < 4)
+ADDRLP4 28
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $347
+ADDRLP4 28
+INDIRP4
+CNSTI4 228
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $347
+line 722
+;722:			G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 32
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+line 723
+;723:		}
+line 724
+;724:		return;
+LABELV $398
+line 726
+;725:	}
+;726:}
+LABELV $347
+endproc Use_BinaryMover 36 12
+export Use_BinaryMover2
+proc Use_BinaryMover2 12 12
+line 735
+;727:
+;728:
+;729:// KnighthawK: rotatable doors - pos2 fix
+;730:/*
+;731:================
+;732:Use_BinaryMover2
+;733:================
+;734:*/
+;735:void Use_BinaryMover2( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
+line 737
+;736:	// only the master should be used
+;737:	if ( ent->flags & FL_TEAMSLAVE ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 1024
+BANDI4
+CNSTI4 0
+EQI4 $416
+line 738
+;738:		Use_BinaryMover( ent->teammaster, other, activator );
+ADDRFP4 0
+INDIRP4
+CNSTI4 780
+ADDP4
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 739
+;739:		return;
+ADDRGP4 $415
+JUMPV
+LABELV $416
+line 742
+;740:	}
+;741:
+;742:	ent->activator = activator;
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+ADDRFP4 8
+INDIRP4
+ASGNP4
+line 746
+;743:
+;744:// special state for the door when it waits to go back
+;745:	// if all the way up, just delay before coming down
+;746: 	if( ent->moverState == MOVER_POS2 )
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $418
+line 747
+;747:	{
+line 750
+;748:		// start moving 50 msec later, becase if this was player
+;749:		// triggered, level.time hasn't been advanced yet
+;750:		MatchTeam( ent, MOVER_2TO1, level.time + 50 );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 3
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 752
+;751:		// starting sound
+;752:		if ( ent->sound2to1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $421
+line 753
+;753:			if ( other->client && other->client->ps.stats[STAT_STEALTH] < 4)
+ADDRLP4 0
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $423
+ADDRLP4 0
+INDIRP4
+CNSTI4 228
+ADDP4
+INDIRI4
+CNSTI4 4
+GEI4 $423
+line 754
+;754:			G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 4
+INDIRP4
+CNSTI4 588
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $423
+line 755
+;755:		}
+LABELV $421
+line 758
+;756:
+;757:		// looping sound
+;758:		ent->s.loopSound = ent->soundLoop;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 761
+;759:
+;760:		// close areaportal
+;761:		if ( ent->teammaster == ent || !ent->teammaster ) {
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+ADDRLP4 4
+INDIRP4
+CNSTI4 780
+ADDP4
+INDIRP4
+CVPU4 4
+ASGNU4
+ADDRLP4 8
+INDIRU4
+ADDRLP4 4
+INDIRP4
+CVPU4 4
+EQU4 $427
+ADDRLP4 8
+INDIRU4
+CNSTU4 0
+NEU4 $425
+LABELV $427
+line 762
+;762:			trap_AdjustAreaPortalState( ent, qtrue );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 1
+ARGI4
+ADDRGP4 trap_AdjustAreaPortalState
+CALLV
+pop
+line 763
+;763:		}
+LABELV $425
+line 764
+;764:		ent->nextthink = -1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+CNSTI4 -1
+ASGNI4
+line 765
+;765:	} 
+LABELV $418
+line 766
+;766:}
+LABELV $415
+endproc Use_BinaryMover2 12 12
+export InitMover
+proc InitMover 132 12
+line 778
+;767:// KnighthawK.
+;768:
+;769:
+;770:/*
+;771:================
+;772:InitMover
+;773:
+;774:"pos1", "pos2", and "speed" should be set before calling,
+;775:so the movement delta can be calculated
+;776:================
+;777:*/
+;778:void InitMover( gentity_t *ent ) {
+line 788
+;779:	vec3_t		move;
+;780:	float		distance;
+;781:	float		light;
+;782:	vec3_t		color;
+;783:	qboolean	lightSet, colorSet;
+;784:	char		*sound;
+;785:
+;786:	// if the "model2" key is set, use a seperate model
+;787:	// for drawing, but clip against the brushes
+;788:	if ( ent->model2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 544
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $429
+line 789
+;789:		ent->s.modelindex2 = G_ModelIndex( ent->model2 );
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 544
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 48
+ADDRGP4 G_ModelIndex
+CALLI4
+ASGNI4
+ADDRLP4 44
+INDIRP4
+CNSTI4 164
+ADDP4
+ADDRLP4 48
+INDIRI4
+ASGNI4
+line 790
+;790:	}
+LABELV $429
+line 793
+;791:
+;792:	// if the "loopsound" key is set, use a constant looping sound when moving
+;793:	if ( G_SpawnString( "noise", "100", &sound ) ) {
+ADDRGP4 $433
+ARGP4
+ADDRGP4 $434
+ARGP4
+ADDRLP4 40
+ARGP4
+ADDRLP4 44
+ADDRGP4 G_SpawnString
+CALLI4
+ASGNI4
+ADDRLP4 44
+INDIRI4
+CNSTI4 0
+EQI4 $431
+line 794
+;794:		ent->s.loopSound = G_SoundIndex( sound );
+ADDRLP4 40
+INDIRP4
+ARGP4
+ADDRLP4 48
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 48
+INDIRI4
+ASGNI4
+line 795
+;795:	}
+LABELV $431
+line 798
+;796:
+;797:	// if the "color" or "light" keys are set, setup constantLight
+;798:	lightSet = G_SpawnFloat( "light", "100", &light );
+ADDRGP4 $435
+ARGP4
+ADDRGP4 $434
+ARGP4
+ADDRLP4 36
+ARGP4
+ADDRLP4 48
+ADDRGP4 G_SpawnFloat
+CALLI4
+ASGNI4
+ADDRLP4 28
+ADDRLP4 48
+INDIRI4
+ASGNI4
+line 799
+;799:	colorSet = G_SpawnVector( "color", "1 1 1", color );
+ADDRGP4 $436
+ARGP4
+ADDRGP4 $437
+ARGP4
+ADDRLP4 16
+ARGP4
+ADDRLP4 52
+ADDRGP4 G_SpawnVector
+CALLI4
+ASGNI4
+ADDRLP4 32
+ADDRLP4 52
+INDIRI4
+ASGNI4
+line 800
+;800:	if ( lightSet || colorSet ) {
+ADDRLP4 56
+CNSTI4 0
+ASGNI4
+ADDRLP4 28
+INDIRI4
+ADDRLP4 56
+INDIRI4
+NEI4 $440
+ADDRLP4 32
+INDIRI4
+ADDRLP4 56
+INDIRI4
+EQI4 $438
+LABELV $440
+line 803
+;801:		int		r, g, b, i;
+;802:
+;803:		r = color[0] * 255;
+ADDRLP4 60
+CNSTF4 1132396544
+ADDRLP4 16
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 804
+;804:		if ( r > 255 ) {
+ADDRLP4 60
+INDIRI4
+CNSTI4 255
+LEI4 $441
+line 805
+;805:			r = 255;
+ADDRLP4 60
+CNSTI4 255
+ASGNI4
+line 806
+;806:		}
+LABELV $441
+line 807
+;807:		g = color[1] * 255;
+ADDRLP4 64
+CNSTF4 1132396544
+ADDRLP4 16+4
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 808
+;808:		if ( g > 255 ) {
+ADDRLP4 64
+INDIRI4
+CNSTI4 255
+LEI4 $444
+line 809
+;809:			g = 255;
+ADDRLP4 64
+CNSTI4 255
+ASGNI4
+line 810
+;810:		}
+LABELV $444
+line 811
+;811:		b = color[2] * 255;
+ADDRLP4 68
+CNSTF4 1132396544
+ADDRLP4 16+8
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 812
+;812:		if ( b > 255 ) {
+ADDRLP4 68
+INDIRI4
+CNSTI4 255
+LEI4 $447
+line 813
+;813:			b = 255;
+ADDRLP4 68
+CNSTI4 255
+ASGNI4
+line 814
+;814:		}
+LABELV $447
+line 815
+;815:		i = light / 4;
+ADDRLP4 72
+ADDRLP4 36
+INDIRF4
+CNSTF4 1082130432
+DIVF4
+CVFI4 4
+ASGNI4
+line 816
+;816:		if ( i > 255 ) {
+ADDRLP4 72
+INDIRI4
+CNSTI4 255
+LEI4 $449
+line 817
+;817:			i = 255;
+ADDRLP4 72
+CNSTI4 255
+ASGNI4
+line 818
+;818:		}
+LABELV $449
+line 819
+;819:		ent->s.constantLight = r | ( g << 8 ) | ( b << 16 ) | ( i << 24 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 152
+ADDP4
+ADDRLP4 60
+INDIRI4
+ADDRLP4 64
+INDIRI4
+CNSTI4 8
+LSHI4
+BORI4
+ADDRLP4 68
+INDIRI4
+CNSTI4 16
+LSHI4
+BORI4
+ADDRLP4 72
+INDIRI4
+CNSTI4 24
+LSHI4
+BORI4
+ASGNI4
+line 820
+;820:	}
+LABELV $438
+line 823
+;821:
+;822:
+;823:	ent->use = Use_BinaryMover;
+ADDRFP4 0
+INDIRP4
+CNSTI4 708
+ADDP4
+ADDRGP4 Use_BinaryMover
+ASGNP4
+line 824
+;824:	ent->reached = Reached_BinaryMover;
+ADDRFP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+ADDRGP4 Reached_BinaryMover
+ASGNP4
+line 826
+;825:
+;826:	ent->moverState = MOVER_POS1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 0
+ASGNI4
+line 827
+;827:	ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+ADDRFP4 0
+INDIRP4
+CNSTI4 424
+ADDP4
+CNSTI4 128
+ASGNI4
+line 828
+;828:	ent->s.eType = ET_MOVER;
+ADDRLP4 60
+CNSTI4 4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 60
+INDIRI4
+ADDP4
+ADDRLP4 60
+INDIRI4
+ASGNI4
+line 830
+;829:
+;830:	VectorCopy (ent->pos1, ent->r.currentOrigin);
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 64
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 64
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 831
+;831:	trap_LinkEntity (ent);
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 833
+;832:
+;833:	ent->s.pos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 0
+ASGNI4
+line 834
+;834:	VectorCopy( ent->pos1, ent->s.pos.trBase );
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 837
+;835:
+;836:	// calculate time to reach second position from speed
+;837:	VectorSubtract( ent->pos2, ent->pos1, move );
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 72
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 72
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 76
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 76
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 76
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 838
+;838:	distance = VectorLength( move );
+ADDRLP4 0
+ARGP4
+ADDRLP4 80
+ADDRGP4 VectorLength
+CALLF4
+ASGNF4
+ADDRLP4 12
+ADDRLP4 80
+INDIRF4
+ASGNF4
+line 839
+;839:	if ( ! ent->speed ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $453
+line 840
+;840:		ent->speed = 100;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1120403456
+ASGNF4
+line 841
+;841:	}
+LABELV $453
+line 842
+;842:	VectorScale( move, ent->speed, ent->s.pos.trDelta );
+ADDRLP4 84
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 84
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 84
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 88
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 88
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 88
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 92
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 92
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 92
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+line 843
+;843:	ent->s.pos.trDuration = distance * 1000 / ent->speed;
+ADDRLP4 96
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 96
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 12
+INDIRF4
+MULF4
+ADDRLP4 96
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 844
+;844:	if ( ent->s.pos.trDuration <= 0 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CNSTI4 0
+GTI4 $457
+line 845
+;845:		ent->s.pos.trDuration = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTI4 1
+ASGNI4
+line 846
+;846:	}
+LABELV $457
+line 848
+;847:// KnighthawK: rotating door stuff
+;848:	if( ent->flags & FL_ROTATE ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 204800
+BANDI4
+CNSTI4 0
+EQI4 $459
+line 849
+;849:		VectorCopy( ent->s.angles, ent->s.apos.trBase );
+ADDRLP4 100
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 100
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 100
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRB
+ASGNB 12
+line 850
+;850:		VectorSubtract( ent->s.angles2, ent->s.angles, move );
+ADDRLP4 104
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 104
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRF4
+ADDRLP4 104
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 104
+INDIRP4
+CNSTI4 132
+ADDP4
+INDIRF4
+ADDRLP4 104
+INDIRP4
+CNSTI4 120
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 108
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 108
+INDIRP4
+CNSTI4 136
+ADDP4
+INDIRF4
+ADDRLP4 108
+INDIRP4
+CNSTI4 124
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 851
+;851:		distance = VectorLength( move );
+ADDRLP4 0
+ARGP4
+ADDRLP4 112
+ADDRGP4 VectorLength
+CALLF4
+ASGNF4
+ADDRLP4 12
+ADDRLP4 112
+INDIRF4
+ASGNF4
+line 852
+;852:		if ( ! ent->speed ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $463
+line 853
+;853:			ent->speed = 100;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1120403456
+ASGNF4
+line 854
+;854:		}
+LABELV $463
+line 855
+;855:		VectorScale( move, ent->speed, ent->s.apos.trDelta );
+ADDRLP4 116
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 116
+INDIRP4
+CNSTI4 72
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 116
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 120
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 120
+INDIRP4
+CNSTI4 76
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 120
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 124
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 124
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 124
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+line 856
+;856:		ent->s.apos.trDuration = distance * 1000 / ent->speed;
+ADDRLP4 128
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 128
+INDIRP4
+CNSTI4 56
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 12
+INDIRF4
+MULF4
+ADDRLP4 128
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 857
+;857:		if( ent->s.apos.trDuration <= 0 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+CNSTI4 0
+GTI4 $467
+line 858
+;858:			ent->s.apos.trDuration = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+CNSTI4 1
+ASGNI4
+line 859
+;859:		}
+LABELV $467
+line 860
+;860:	}
+LABELV $459
+line 862
+;861:
+;862:	ent->moverent = G_Spawn();
+ADDRLP4 100
+ADDRGP4 G_Spawn
+CALLP4
+ASGNP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 1096
+ADDP4
+ADDRLP4 100
+INDIRP4
+ASGNP4
+line 863
+;863:	ent->moverent->r.svFlags |= SVF_NOCLIENT;
+ADDRLP4 104
+ADDRFP4 0
+INDIRP4
+CNSTI4 1096
+ADDP4
+INDIRP4
+CNSTI4 424
+ADDP4
+ASGNP4
+ADDRLP4 104
+INDIRP4
+ADDRLP4 104
+INDIRP4
+INDIRI4
+CNSTI4 1
+BORI4
+ASGNI4
+line 865
+;864:// KnighthawK.
+;865:}
+LABELV $428
+endproc InitMover 132 12
+export Blocked_Door
+proc Blocked_Door 20 12
+line 884
+;866:
+;867:
+;868:/*
+;869:===============================================================================
+;870:
+;871:DOOR
+;872:
+;873:A use can be triggered either by a touch function, by being shot, or by being
+;874:targeted by another entity.
+;875:
+;876:===============================================================================
+;877:*/
+;878:
+;879:/*
+;880:================
+;881:Blocked_Door
+;882:================
+;883:*/
+;884:void Blocked_Door( gentity_t *ent, gentity_t *other ) {
+line 887
+;885: 	gentity_t	*part ; 
+;886: 
+;887:	if ( ent->moverState == MOVER_1TO2 )
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 2
+NEI4 $470
+line 888
+;888:		ent->moverState = MOVER_STOP_1TO2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 4
+ASGNI4
+ADDRGP4 $471
+JUMPV
+LABELV $470
+line 889
+;889:	else if ( ent->moverState == MOVER_2TO1 )
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 3
+NEI4 $472
+line 890
+;890:		ent->moverState = MOVER_STOP_2TO1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 5
+ASGNI4
+LABELV $472
+LABELV $471
+line 892
+;891: 
+;892:	for (part = ent ; part ; part=part->teamchain) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRGP4 $477
+JUMPV
+LABELV $474
+line 893
+;893:		BG_EvaluateTrajectory( &part->s.pos, level.time,  part->r.currentOrigin );
+ADDRLP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 894
+;894:		BG_EvaluateTrajectory( &part->s.apos, level.time,  part->r.currentAngles );
+ADDRLP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+ARGP4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 500
+ADDP4
+ARGP4
+ADDRGP4 BG_EvaluateTrajectory
+CALLV
+pop
+line 896
+;895:
+;896:		VectorCopy( part->r.currentOrigin , part->s.pos.trBase );
+ADDRLP4 0
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 488
+ADDP4
+INDIRB
+ASGNB 12
+line 897
+;897:		VectorCopy( part->r.currentAngles , part->s.apos.trBase );
+ADDRLP4 0
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 500
+ADDP4
+INDIRB
+ASGNB 12
+line 899
+;898: 		
+;899:		part->s.pos.trType = TR_INTERPOLATE;
+ADDRLP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 1
+ASGNI4
+line 900
+;900:		part->s.pos.trTime = level.time;
+ADDRLP4 0
+INDIRP4
+CNSTI4 16
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+ASGNI4
+line 901
+;901:		part->s.apos.trType = TR_INTERPOLATE;
+ADDRLP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 1
+ASGNI4
+line 902
+;902:		part->s.apos.trTime  = level.time; 
+ADDRLP4 0
+INDIRP4
+CNSTI4 52
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+ASGNI4
+line 903
+;903:	}  
+LABELV $475
+line 892
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $477
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $474
+line 904
+;904:}
+LABELV $469
+endproc Blocked_Door 20 12
+proc Touch_DoorTriggerSpectator 76 12
+line 912
+;905:
+;906:/*
+;907:================
+;908:Touch_DoorTriggerSpectator
+;909:================
+;910:*/
+;911:
+;912:static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_t *trace ) {
+line 916
+;913:	int i, axis;
+;914:	vec3_t origin, dir, angles;
+;915:
+;916:	axis = ent->count;
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+CNSTI4 760
+ADDP4
+INDIRI4
+ASGNI4
+line 917
+;917:	if ( !Is_Spectator(other ) )
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRLP4 44
+ADDRGP4 Is_Spectator
+CALLI4
+ASGNI4
+ADDRLP4 44
+INDIRI4
+CNSTI4 0
+NEI4 $483
+line 918
+;918:		return;
+ADDRGP4 $482
+JUMPV
+LABELV $483
+line 920
+;919:
+;920:	VectorClear(dir);
+ADDRLP4 48
+CNSTF4 0
+ASGNF4
+ADDRLP4 20+8
+ADDRLP4 48
+INDIRF4
+ASGNF4
+ADDRLP4 20+4
+ADDRLP4 48
+INDIRF4
+ASGNF4
+ADDRLP4 20
+ADDRLP4 48
+INDIRF4
+ASGNF4
+line 921
+;921:	if (fabs(other->s.origin[axis] - ent->r.absmax[axis]) <
+ADDRLP4 52
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 52
+INDIRI4
+ADDRFP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 52
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 476
+ADDP4
+ADDP4
+INDIRF4
+SUBF4
+ARGF4
+ADDRLP4 56
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 60
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 60
+INDIRI4
+ADDRFP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ADDP4
+INDIRF4
+SUBF4
+ARGF4
+ADDRLP4 64
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 56
+INDIRF4
+ADDRLP4 64
+INDIRF4
+GEF4 $487
+line 922
+;922:		fabs(other->s.origin[axis] - ent->r.absmin[axis])) {
+line 923
+;923:		origin[axis] = ent->r.absmin[axis] - 10;
+ADDRLP4 68
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 68
+INDIRI4
+ADDRLP4 8
+ADDP4
+ADDRLP4 68
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ADDP4
+INDIRF4
+CNSTF4 1092616192
+SUBF4
+ASGNF4
+line 924
+;924:		dir[axis] = -1;
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 20
+ADDP4
+CNSTF4 3212836864
+ASGNF4
+line 925
+;925:	}
+ADDRGP4 $488
+JUMPV
+LABELV $487
+line 926
+;926:	else {
+line 927
+;927:		origin[axis] = ent->r.absmax[axis] + 10;
+ADDRLP4 68
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 68
+INDIRI4
+ADDRLP4 8
+ADDP4
+ADDRLP4 68
+INDIRI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 476
+ADDP4
+ADDP4
+INDIRF4
+CNSTF4 1092616192
+ADDF4
+ASGNF4
+line 928
+;928:		dir[axis] = 1;
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 20
+ADDP4
+CNSTF4 1065353216
+ASGNF4
+line 929
+;929:	}
+LABELV $488
+line 930
+;930:	for (i = 0; i < 3; i++) {
+ADDRLP4 0
+CNSTI4 0
+ASGNI4
+LABELV $489
+line 931
+;931:		if (i == axis) continue;
+ADDRLP4 0
+INDIRI4
+ADDRLP4 4
+INDIRI4
+NEI4 $493
+ADDRGP4 $490
+JUMPV
+LABELV $493
+line 932
+;932:		origin[i] = (ent->r.absmin[i] + ent->r.absmax[i]) * 0.5;
+ADDRLP4 68
+ADDRLP4 0
+INDIRI4
+CNSTI4 2
+LSHI4
+ASGNI4
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRI4
+ADDRLP4 8
+ADDP4
+CNSTF4 1056964608
+ADDRLP4 68
+INDIRI4
+ADDRLP4 72
+INDIRP4
+CNSTI4 464
+ADDP4
+ADDP4
+INDIRF4
+ADDRLP4 68
+INDIRI4
+ADDRLP4 72
+INDIRP4
+CNSTI4 476
+ADDP4
+ADDP4
+INDIRF4
+ADDF4
+MULF4
+ASGNF4
+line 933
+;933:	}
+LABELV $490
+line 930
+ADDRLP4 0
+ADDRLP4 0
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+ADDRLP4 0
+INDIRI4
+CNSTI4 3
+LTI4 $489
+line 934
+;934:	vectoangles(dir, angles);
+ADDRLP4 20
+ARGP4
+ADDRLP4 32
+ARGP4
+ADDRGP4 vectoangles
+CALLV
+pop
+line 935
+;935:	TeleportPlayer(other, origin, angles );
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRLP4 8
+ARGP4
+ADDRLP4 32
+ARGP4
+ADDRGP4 TeleportPlayer
+CALLV
+pop
+line 936
+;936:}
+LABELV $482
+endproc Touch_DoorTriggerSpectator 76 12
+export Door_ResetState
+proc Door_ResetState 8 12
+line 945
+;937: 
+;938: 
+;939:/*
+;940:==================
+;941:Reset a door in the beginning of a round.
+;942:==================
+;943:*/
+;944:void Door_ResetState( gentity_t *door )
+;945:{	  
+line 946
+;946:	if ( door->moverState == MOVER_POS2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $496
+line 947
+;947:		Use_BinaryMover2(door, door, door );
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover2
+CALLV
+pop
+line 948
+;948:	} else if ( door->moverState == MOVER_POS1 ) {
+ADDRGP4 $497
+JUMPV
+LABELV $496
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $498
+line 950
+;949:		// closed do nothing
+;950:	} else if ( door->moverState == MOVER_STOP_1TO2 || 
+ADDRGP4 $499
+JUMPV
+LABELV $498
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ASGNI4
+ADDRLP4 0
+INDIRI4
+CNSTI4 4
+EQI4 $502
+ADDRLP4 0
+INDIRI4
+CNSTI4 5
+NEI4 $500
+LABELV $502
+line 952
+;951:		door->moverState == MOVER_STOP_2TO1 )
+;952:	{
+line 954
+;953:		// we're moving from closed to open but stopped
+;954:		if ( door->moverState == MOVER_STOP_1TO2 )
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 4
+NEI4 $503
+line 955
+;955:			door->moverState = MOVER_STOP_2TO1; // so set state to open->close 
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+CNSTI4 5
+ASGNI4
+LABELV $503
+line 958
+;956:
+;957:		// close door
+;958:		Use_BinaryMover( door, door, door );
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+INDIRP4
+ARGP4
+ADDRLP4 4
+INDIRP4
+ARGP4
+ADDRLP4 4
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 959
+;959:	}
+LABELV $500
+LABELV $499
+LABELV $497
+line 961
+;960:
+;961:}
+LABELV $495
+endproc Door_ResetState 8 12
+export Touch_DoorTrigger
+proc Touch_DoorTrigger 32 16
+line 969
+;962:
+;963:/*
+;964:================
+;965:Touch_DoorTrigger
+;966:================
+;967:*/ 
+;968:void Touch_DoorTrigger( gentity_t *ent, gentity_t *other, trace_t *trace )
+;969:{
+line 971
+;970:
+;971:	if( !other->client )
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $506
+line 972
+;972:		return;
+ADDRGP4 $505
+JUMPV
+LABELV $506
+line 974
+;973:	// only open if use button ise pressed
+;974:	if ( !(other->client->buttons & BUTTON_USE ) )
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CNSTI4 1848
+ADDP4
+INDIRI4
+CNSTI4 4
+BANDI4
+CNSTI4 0
+NEI4 $508
+line 975
+;975:		return;
+ADDRGP4 $505
+JUMPV
+LABELV $508
+line 976
+;976:	if ( other->client->buttons & BUTTON_USE && !(other->client->oldbuttons & BUTTON_USE) )
+ADDRLP4 0
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 4
+CNSTI4 4
+ASGNI4
+ADDRLP4 8
+CNSTI4 0
+ASGNI4
+ADDRLP4 0
+INDIRP4
+CNSTI4 1848
+ADDP4
+INDIRI4
+ADDRLP4 4
+INDIRI4
+BANDI4
+ADDRLP4 8
+INDIRI4
+EQI4 $510
+ADDRLP4 0
+INDIRP4
+CNSTI4 1852
+ADDP4
+INDIRI4
+ADDRLP4 4
+INDIRI4
+BANDI4
+ADDRLP4 8
+INDIRI4
+NEI4 $510
+line 977
+;977:		NS_PlayerAnimation( other, TORSO_OPEN_DOOR, 750, qfalse ); 
+ADDRFP4 4
+INDIRP4
+ARGP4
+CNSTI4 17
+ARGI4
+CNSTI4 750
+ARGI4
+CNSTI4 0
+ARGI4
+ADDRGP4 NS_PlayerAnimation
+CALLV
+pop
+LABELV $510
+line 979
+;978:
+;979:	if ( Is_Spectator( other ) && other->client )
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRLP4 12
+ADDRGP4 Is_Spectator
+CALLI4
+ASGNI4
+ADDRLP4 12
+INDIRI4
+CNSTI4 0
+EQI4 $512
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $512
+line 980
+;980:	{ 
+line 981
+;981:		Touch_DoorTriggerSpectator( ent, other, trace );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRGP4 Touch_DoorTriggerSpectator
+CALLV
+pop
+line 982
+;982:		return;
+ADDRGP4 $505
+JUMPV
+LABELV $512
+line 985
+;983:	}  
+;984:	// if client and spectator
+;985:	if ( other->client && Is_Spectator(other) )
+ADDRLP4 16
+ADDRFP4 4
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $514
+ADDRLP4 16
+INDIRP4
+ARGP4
+ADDRLP4 20
+ADDRGP4 Is_Spectator
+CALLI4
+ASGNI4
+ADDRLP4 20
+INDIRI4
+CNSTI4 0
+EQI4 $514
+line 986
+;986:	{	// if the door is not open and not opening
+line 987
+;987:		Touch_DoorTriggerSpectator( ent, other, trace );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRGP4 Touch_DoorTriggerSpectator
+CALLV
+pop
+line 988
+;988:	} else if ( ent->parent->moverState == MOVER_POS2 ) {
+ADDRGP4 $515
+JUMPV
+LABELV $514
+ADDRFP4 0
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $516
+line 989
+;989:		Use_BinaryMover2( ent->parent, ent, other );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover2
+CALLV
+pop
+line 990
+;990:	} else if ( ent->parent->moverState == MOVER_POS1 ) {
+ADDRGP4 $517
+JUMPV
+LABELV $516
+ADDRFP4 0
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $518
+line 991
+;991:		Use_BinaryMover( ent->parent, ent, other );
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 992
+;992:	} else if ( ent->parent->moverState == MOVER_STOP_1TO2 || ent->parent->moverState == MOVER_STOP_2TO1 ) {
+ADDRGP4 $519
+JUMPV
+LABELV $518
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ASGNI4
+ADDRLP4 24
+INDIRI4
+CNSTI4 4
+EQI4 $522
+ADDRLP4 24
+INDIRI4
+CNSTI4 5
+NEI4 $520
+LABELV $522
+line 993
+;993:		Use_BinaryMover( ent->parent, ent, other );
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 28
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 994
+;994:	} 
+LABELV $520
+LABELV $519
+LABELV $517
+LABELV $515
+line 995
+;995:}
+LABELV $505
+endproc Touch_DoorTrigger 32 16
+export Think_SpawnNewDoorTrigger
+proc Think_SpawnNewDoorTrigger 52 12
+line 1005
+;996: 
+;997:/*
+;998:======================
+;999:Think_SpawnNewDoorTrigger
+;1000:
+;1001:All of the parts of a door have been spawned, so create
+;1002:a trigger that encloses all of them
+;1003:======================
+;1004:*/
+;1005:void Think_SpawnNewDoorTrigger( gentity_t *ent ) {
+line 1011
+;1006:	gentity_t		*other;
+;1007:	vec3_t		mins, maxs;
+;1008:	int			i, best;
+;1009:
+;1010:	// set all of the slaves as shootable
+;1011:	for ( other = ent ; other ; other = other->teamchain ) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRGP4 $527
+JUMPV
+LABELV $524
+line 1012
+;1012:		other->takedamage = qtrue;
+ADDRLP4 0
+INDIRP4
+CNSTI4 736
+ADDP4
+CNSTI4 1
+ASGNI4
+line 1013
+;1013:	}
+LABELV $525
+line 1011
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $527
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $524
+line 1016
+;1014:
+;1015:	// find the bounds of everything on the team
+;1016:	VectorCopy (ent->r.absmin, mins);
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+INDIRB
+ASGNB 12
+line 1017
+;1017:	VectorCopy (ent->r.absmax, maxs);
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+CNSTI4 476
+ADDP4
+INDIRB
+ASGNB 12
+line 1019
+;1018:
+;1019:	for (other = ent->teamchain ; other ; other=other->teamchain) {
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+ADDRGP4 $531
+JUMPV
+LABELV $528
+line 1020
+;1020:		AddPointToBounds (other->r.absmin, mins, maxs);
+ADDRLP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ARGP4
+ADDRLP4 8
+ARGP4
+ADDRLP4 20
+ARGP4
+ADDRGP4 AddPointToBounds
+CALLV
+pop
+line 1021
+;1021:		AddPointToBounds (other->r.absmax, mins, maxs);
+ADDRLP4 0
+INDIRP4
+CNSTI4 476
+ADDP4
+ARGP4
+ADDRLP4 8
+ARGP4
+ADDRLP4 20
+ARGP4
+ADDRGP4 AddPointToBounds
+CALLV
+pop
+line 1022
+;1022:	}
+LABELV $529
+line 1019
+ADDRLP4 0
+ADDRLP4 0
+INDIRP4
+CNSTI4 776
+ADDP4
+INDIRP4
+ASGNP4
+LABELV $531
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $528
+line 1025
+;1023:
+;1024:	// find the thinnest axis, which will be the one we expand
+;1025:	best = 0;
+ADDRLP4 32
+CNSTI4 0
+ASGNI4
+line 1026
+;1026:	for ( i = 1 ; i < 3 ; i++ ) {
+ADDRLP4 4
+CNSTI4 1
+ASGNI4
+LABELV $532
+line 1027
+;1027:		if ( maxs[i] - mins[i] < maxs[best] - mins[best] ) {
+ADDRLP4 36
+CNSTI4 2
+ASGNI4
+ADDRLP4 40
+ADDRLP4 4
+INDIRI4
+ADDRLP4 36
+INDIRI4
+LSHI4
+ASGNI4
+ADDRLP4 44
+ADDRLP4 32
+INDIRI4
+ADDRLP4 36
+INDIRI4
+LSHI4
+ASGNI4
+ADDRLP4 40
+INDIRI4
+ADDRLP4 20
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRI4
+ADDRLP4 8
+ADDP4
+INDIRF4
+SUBF4
+ADDRLP4 44
+INDIRI4
+ADDRLP4 20
+ADDP4
+INDIRF4
+ADDRLP4 44
+INDIRI4
+ADDRLP4 8
+ADDP4
+INDIRF4
+SUBF4
+GEF4 $536
+line 1028
+;1028:			best = i;
+ADDRLP4 32
+ADDRLP4 4
+INDIRI4
+ASGNI4
+line 1029
+;1029:		}
+LABELV $536
+line 1030
+;1030:	}
+LABELV $533
+line 1026
+ADDRLP4 4
+ADDRLP4 4
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 3
+LTI4 $532
+line 1031
+;1031:	for ( i=0;i<2;i++)
+ADDRLP4 4
+CNSTI4 0
+ASGNI4
+LABELV $538
+line 1032
+;1032:	{ 
+line 1033
+;1033:		maxs[i] += 10;
+ADDRLP4 36
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 20
+ADDP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+ADDRLP4 36
+INDIRP4
+INDIRF4
+CNSTF4 1092616192
+ADDF4
+ASGNF4
+line 1034
+;1034:		mins[i] -= 10;
+ADDRLP4 40
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 8
+ADDP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+ADDRLP4 40
+INDIRP4
+INDIRF4
+CNSTF4 1092616192
+SUBF4
+ASGNF4
+line 1035
+;1035:	}
+LABELV $539
+line 1031
+ADDRLP4 4
+ADDRLP4 4
+INDIRI4
+CNSTI4 1
+ADDI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 2
+LTI4 $538
+line 1036
+;1036:	maxs[best] += 30;
+ADDRLP4 36
+ADDRLP4 32
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 20
+ADDP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+ADDRLP4 36
+INDIRP4
+INDIRF4
+CNSTF4 1106247680
+ADDF4
+ASGNF4
+line 1037
+;1037:	mins[best] -= 30;
+ADDRLP4 40
+ADDRLP4 32
+INDIRI4
+CNSTI4 2
+LSHI4
+ADDRLP4 8
+ADDP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+ADDRLP4 40
+INDIRP4
+INDIRF4
+CNSTF4 1106247680
+SUBF4
+ASGNF4
+line 1040
+;1038:
+;1039:	// create a trigger with this size
+;1040:	other = G_Spawn ();
+ADDRLP4 44
+ADDRGP4 G_Spawn
+CALLP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 44
+INDIRP4
+ASGNP4
+line 1041
+;1041:	VectorCopy (mins, other->r.mins);
+ADDRLP4 0
+INDIRP4
+CNSTI4 436
+ADDP4
+ADDRLP4 8
+INDIRB
+ASGNB 12
+line 1042
+;1042:	VectorCopy (maxs, other->r.maxs);
+ADDRLP4 0
+INDIRP4
+CNSTI4 448
+ADDP4
+ADDRLP4 20
+INDIRB
+ASGNB 12
+line 1043
+;1043:	other->parent = ent;
+ADDRLP4 0
+INDIRP4
+CNSTI4 600
+ADDP4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+line 1044
+;1044:	other->classname = "door_trigger";
+ADDRLP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+ADDRGP4 $542
+ASGNP4
+line 1045
+;1045:	other->r.contents = CONTENTS_TRIGGER;
+ADDRLP4 0
+INDIRP4
+CNSTI4 460
+ADDP4
+CNSTI4 1073741824
+ASGNI4
+line 1046
+;1046:	other->touch = Touch_DoorTrigger; 
+ADDRLP4 0
+INDIRP4
+CNSTI4 704
+ADDP4
+ADDRGP4 Touch_DoorTrigger
+ASGNP4
+line 1048
+;1047:	// remember the thinnest axis
+;1048:	other->count = best;
+ADDRLP4 0
+INDIRP4
+CNSTI4 760
+ADDP4
+ADDRLP4 32
+INDIRI4
+ASGNI4
+line 1049
+;1049:	trap_LinkEntity (other);
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 1051
+;1050:
+;1051:	MatchTeam( ent, ent->moverState, level.time );
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 48
+INDIRP4
+ARGP4
+ADDRLP4 48
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 1052
+;1052:}
+LABELV $523
+endproc Think_SpawnNewDoorTrigger 52 12
+export Think_MatchTeam
+proc Think_MatchTeam 4 12
+line 1054
+;1053:
+;1054:void Think_MatchTeam( gentity_t *ent ) {
+line 1055
+;1055:	MatchTeam( ent, ent->moverState, level.time );
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 MatchTeam
+CALLV
+pop
+line 1056
+;1056:}
+LABELV $544
+endproc Think_MatchTeam 4 12
+export SP_func_door_rotate
+proc SP_func_door_rotate 72 12
+line 1075
+;1057:
+;1058:
+;1059:
+;1060:/*QUAKED func_door_rotate (0 .5 .8) ? X Y Z
+;1061:TOGGLE		wait in both the start and end states for a trigger event.
+;1062:START_OPEN	the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+;1063:NOMONSTER	monsters will not trigger this door
+;1064:
+;1065:"model2"	.md3 model to also draw
+;1066:"angle"		determines the opening direction
+;1067:"targetname" if set, no touch field will be spawned and a remote button or trigger field activates the door.
+;1068:"speed"		movement speed (100 default)
+;1069:"wait"		wait before returning (3 default, -1 = never return)
+;1070:"dmg"		damage to inflict when blocked (2 default)
+;1071:"color"		constantLight color
+;1072:"light"		constantLight radius
+;1073:"health"	if set, the door must be shot open
+;1074:*/
+;1075:void SP_func_door_rotate (gentity_t *ent) {
+line 1076
+;1076:	VectorClear( ent->s.angles );
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+CNSTF4 0
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 124
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 120
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 116
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+line 1077
+;1077:	VectorCopy( ent->s.angles, ent->s.angles2);
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 128
+ADDP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRB
+ASGNB 12
+line 1080
+;1078:
+;1079:	// default angle to 90 degrees
+;1080:	G_SpawnFloat( "angle", "0", &ent->angle	);
+ADDRGP4 $547
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 644
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1082
+;1081:
+;1082:	G_SpawnInt("elevator_index", "-1", &ent->elevator_index);
+ADDRGP4 $549
+ARGP4
+ADDRGP4 $550
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1084
+;1083:
+;1084:	if( !ent->angle )
+ADDRFP4 0
+INDIRP4
+CNSTI4 644
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $551
+line 1085
+;1085:		ent->angle = 90;
+ADDRFP4 0
+INDIRP4
+CNSTI4 644
+ADDP4
+CNSTF4 1119092736
+ASGNF4
+LABELV $551
+line 1087
+;1086:
+;1087:	ent->flags |= FL_OPENDOOR;
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+ADDRLP4 12
+INDIRP4
+INDIRI4
+CNSTI4 90112
+BORI4
+ASGNI4
+line 1088
+;1088:	ent->flags |= FL_ROTATE;
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+ADDRLP4 16
+INDIRP4
+INDIRI4
+CNSTI4 204800
+BORI4
+ASGNI4
+line 1091
+;1089:
+;1090:	// set the axis of rotation
+;1091:	VectorClear(ent->movedir);
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+CNSTF4 0
+ASGNF4
+ADDRLP4 20
+INDIRP4
+CNSTI4 684
+ADDP4
+ADDRLP4 24
+INDIRF4
+ASGNF4
+ADDRLP4 20
+INDIRP4
+CNSTI4 680
+ADDP4
+ADDRLP4 24
+INDIRF4
+ASGNF4
+ADDRLP4 20
+INDIRP4
+CNSTI4 676
+ADDP4
+ADDRLP4 24
+INDIRF4
+ASGNF4
+line 1092
+;1092:	if (ent->spawnflags & 1) {			// X AXIS
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 1
+BANDI4
+CNSTI4 0
+EQI4 $553
+line 1093
+;1093:		ent->movedir[2] = 1.0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 684
+ADDP4
+CNSTF4 1065353216
+ASGNF4
+line 1094
+;1094:		ent->s.angles2[2] += ent->angle;
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+ADDRLP4 28
+INDIRP4
+CNSTI4 136
+ADDP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ADDRLP4 32
+INDIRP4
+INDIRF4
+ADDRLP4 28
+INDIRP4
+CNSTI4 644
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 1095
+;1095:	} else if (ent->spawnflags & 2) {	// Y AXIS
+ADDRGP4 $554
+JUMPV
+LABELV $553
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 2
+BANDI4
+CNSTI4 0
+EQI4 $555
+line 1096
+;1096:		ent->movedir[0] = 1.0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 676
+ADDP4
+CNSTF4 1065353216
+ASGNF4
+line 1097
+;1097:		ent->s.angles2[0] += ent->angle;
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+ADDRLP4 28
+INDIRP4
+CNSTI4 128
+ADDP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ADDRLP4 32
+INDIRP4
+INDIRF4
+ADDRLP4 28
+INDIRP4
+CNSTI4 644
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 1098
+;1098:	} else {							// Z AXIS
+ADDRGP4 $556
+JUMPV
+LABELV $555
+line 1099
+;1099:		ent->movedir[1] = 1.0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 680
+ADDP4
+CNSTF4 1065353216
+ASGNF4
+line 1100
+;1100:		ent->s.angles2[1] += ent->angle;
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+ADDRLP4 28
+INDIRP4
+CNSTI4 132
+ADDP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ADDRLP4 32
+INDIRP4
+INDIRF4
+ADDRLP4 28
+INDIRP4
+CNSTI4 644
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 1101
+;1101:	} 
+LABELV $556
+LABELV $554
+line 1103
+;1102:
+;1103:	ent->pain_debounce_time = qfalse;
+ADDRFP4 0
+INDIRP4
+CNSTI4 720
+ADDP4
+CNSTI4 0
+ASGNI4
+line 1107
+;1104:
+;1105:	// moving sounds
+;1106:	// reached position sounds
+;1107:	ent->sound1to2 = G_SoundIndex("sound/movers/doors/wooddoor_o.wav");
+ADDRGP4 $557
+ARGP4
+ADDRLP4 28
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 584
+ADDP4
+ADDRLP4 28
+INDIRI4
+ASGNI4
+line 1108
+;1108:	ent->soundPos1 = G_SoundIndex("sound/movers/doors/wooddoor_c.wav");
+ADDRGP4 $558
+ARGP4
+ADDRLP4 32
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 580
+ADDP4
+ADDRLP4 32
+INDIRI4
+ASGNI4
+line 1110
+;1109:
+;1110:	ent->blocked = Blocked_Door;
+ADDRFP4 0
+INDIRP4
+CNSTI4 700
+ADDP4
+ADDRGP4 Blocked_Door
+ASGNP4
+line 1113
+;1111:
+;1112:	// default damage of 0 points
+;1113:	G_SpawnInt( "dmg", "0", &ent->damage );
+ADDRGP4 $559
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1116
+;1114:
+;1115:	// default speed of 100
+;1116:	G_SpawnFloat( "speed", "0", &ent->speed );
+ADDRGP4 $560
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1117
+;1117:	if (!ent->speed)
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $561
+line 1118
+;1118:		ent->speed = 100;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1120403456
+ASGNF4
+LABELV $561
+line 1121
+;1119:
+;1120:	// default wait of -1 second, which is forever.
+;1121:	G_SpawnFloat( "wait", "-1", &ent->wait );
+ADDRGP4 $563
+ARGP4
+ADDRGP4 $550
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1122
+;1122:	if (!ent->wait)
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $564
+line 1123
+;1123:		ent->wait = -1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+CNSTF4 3212836864
+ASGNF4
+LABELV $564
+line 1124
+;1124:	if ( ent->wait > 0 )
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 0
+LEF4 $566
+line 1125
+;1125:		ent->wait *= 1000;
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+CNSTF4 1148846080
+ADDRLP4 36
+INDIRP4
+INDIRF4
+MULF4
+ASGNF4
+LABELV $566
+line 1126
+;1126:	ent->classname = "func_door_rotate";
+ADDRFP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+ADDRGP4 $229
+ASGNP4
+line 1129
+;1127:
+;1128:	// We'll just set pos1 and 2 to its origin, as it wont be moving
+;1129:	VectorCopy( ent->s.origin, ent->pos1 );
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1130
+;1130:	VectorCopy( ent->pos1, ent->pos2 );
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 1133
+;1131:
+;1132:	// calculate second position
+;1133:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 48
+INDIRP4
+ARGP4
+ADDRLP4 48
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1136
+;1134:
+;1135:	// if the door should start open, reverse pos1 and pos2
+;1136:	if ( ent->spawnflags & 4 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 4
+BANDI4
+CNSTI4 0
+EQI4 $568
+line 1139
+;1137:		vec3_t	temp;
+;1138:
+;1139:		VectorCopy( ent->pos2, temp );
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 1140
+;1140:		VectorCopy( ent->s.origin, ent->pos2 );
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 64
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 64
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1141
+;1141:		VectorCopy( temp, ent->pos1 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 52
+INDIRB
+ASGNB 12
+line 1143
+;1142:
+;1143:		VectorCopy( ent->s.angles2, temp );
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+CNSTI4 128
+ADDP4
+INDIRB
+ASGNB 12
+line 1144
+;1144:		VectorCopy( ent->s.angles, ent->s.angles2 );
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 128
+ADDP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRB
+ASGNB 12
+line 1145
+;1145:		VectorCopy( temp, ent->s.angles );
+ADDRFP4 0
+INDIRP4
+CNSTI4 116
+ADDP4
+ADDRLP4 52
+INDIRB
+ASGNB 12
+line 1147
+;1146:
+;1147:	}
+LABELV $568
+line 1149
+;1148:
+;1149:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1151
+;1150:  
+;1151:	ent->nextthink = level.time + FRAMETIME;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 100
+ADDI4
+ASGNI4
+line 1153
+;1152:
+;1153:	if ( ! (ent->flags & FL_TEAMSLAVE ) ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 1024
+BANDI4
+CNSTI4 0
+NEI4 $571
+line 1154
+;1154:		G_SpawnInt( "health", "0", &ent->health );
+ADDRGP4 $573
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 732
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1155
+;1155:		if ( ent->health ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 732
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $574
+line 1156
+;1156:			ent->takedamage = qtrue; 
+ADDRFP4 0
+INDIRP4
+CNSTI4 736
+ADDP4
+CNSTI4 1
+ASGNI4
+line 1157
+;1157:		}
+LABELV $574
+line 1158
+;1158:		if ( ent->targetname || ent->health ) {
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 52
+INDIRP4
+CNSTI4 652
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $578
+ADDRLP4 52
+INDIRP4
+CNSTI4 732
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $576
+LABELV $578
+line 1160
+;1159:			// non touch/shoot doors
+;1160:		 	ent->think = Think_MatchTeam;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_MatchTeam
+ASGNP4
+line 1161
+;1161:		} else {
+ADDRGP4 $577
+JUMPV
+LABELV $576
+line 1162
+;1162:	 		ent->think = Think_SpawnNewDoorTrigger;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_SpawnNewDoorTrigger
+ASGNP4
+line 1163
+;1163:			ent->s.eType = ET_DOOR;
+ADDRFP4 0
+INDIRP4
+CNSTI4 4
+ADDP4
+CNSTI4 15
+ASGNI4
+line 1164
+;1164:		}
+LABELV $577
+line 1165
+;1165:	} 
+LABELV $571
+line 1166
+;1166:}
+LABELV $546
+endproc SP_func_door_rotate 72 12
+export SP_func_door
+proc SP_func_door 96 12
+line 1184
+;1167:
+;1168:/*QUAKED func_door (0 .5 .8) ? START_OPEN x CRUSHER
+;1169:TOGGLE		wait in both the start and end states for a trigger event.
+;1170:START_OPEN	the door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+;1171:NOMONSTER	monsters will not trigger this door
+;1172:
+;1173:"model2"	.md3 model to also draw
+;1174:"angle"		determines the opening direction
+;1175:"targetname" if set, no touch field will be spawned and a remote button or trigger field activates the door.
+;1176:"speed"		movement speed (100 default)
+;1177:"wait"		wait before returning (3 default, -1 = never return)
+;1178:"lip"		lip remaining at end of move (8 default)
+;1179:"dmg"		damage to inflict when blocked (2 default)
+;1180:"color"		constantLight color
+;1181:"light"		constantLight radius
+;1182:"health"	if set, the door must be shot open
+;1183:*/
+;1184:void SP_func_door (gentity_t *ent) {
+line 1191
+;1185:	vec3_t	abs_movedir;
+;1186:	float	distance;
+;1187:	vec3_t	size;
+;1188:	float	lip;
+;1189:
+;1190:	// additional elevator support
+;1191:	G_SpawnInt("elevator_index", "-1", &ent->elevator_index);
+ADDRGP4 $549
+ARGP4
+ADDRGP4 $550
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1193
+;1192:
+;1193:	if (ent->elevator_index < 0) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+INDIRI4
+CNSTI4 0
+GEI4 $580
+line 1194
+;1194:		ent->sound1to2 = G_SoundIndex("sound/movers/doors/dr1_strt.wav");
+ADDRGP4 $582
+ARGP4
+ADDRLP4 32
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 584
+ADDP4
+ADDRLP4 32
+INDIRI4
+ASGNI4
+line 1195
+;1195:		ent->soundPos1 = G_SoundIndex("sound/movers/doors/dr1_end.wav");
+ADDRGP4 $583
+ARGP4
+ADDRLP4 36
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 580
+ADDP4
+ADDRLP4 36
+INDIRI4
+ASGNI4
+line 1196
+;1196:	} else {
+ADDRGP4 $581
+JUMPV
+LABELV $580
+line 1197
+;1197:		ent->sound1to2 = ent->sound2to1 = G_SoundIndex("sound/movers/doors/elevdoor.wav");
+ADDRGP4 $584
+ARGP4
+ADDRLP4 32
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 588
+ADDP4
+ADDRLP4 32
+INDIRI4
+ASGNI4
+ADDRLP4 36
+INDIRP4
+CNSTI4 584
+ADDP4
+ADDRLP4 32
+INDIRI4
+ASGNI4
+line 1198
+;1198:	}
+LABELV $581
+line 1200
+;1199:
+;1200:	ent->blocked = Blocked_Door;
+ADDRFP4 0
+INDIRP4
+CNSTI4 700
+ADDP4
+ADDRGP4 Blocked_Door
+ASGNP4
+line 1203
+;1201:
+;1202:	// default speed of 400
+;1203:	if (!ent->speed)
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $585
+line 1204
+;1204:		ent->speed = 400;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1137180672
+ASGNF4
+LABELV $585
+line 1207
+;1205:
+;1206:	// default wait of 2 seconds
+;1207:	if (!ent->wait)
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $587
+line 1208
+;1208:		ent->wait = 2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+CNSTF4 1073741824
+ASGNF4
+LABELV $587
+line 1209
+;1209:	if (ent->wait != -1)
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 3212836864
+EQF4 $589
+line 1210
+;1210:		ent->wait *= 1000;
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+CNSTF4 1148846080
+ADDRLP4 32
+INDIRP4
+INDIRF4
+MULF4
+ASGNF4
+LABELV $589
+line 1213
+;1211:
+;1212:	// default lip of 8 units
+;1213:	G_SpawnFloat( "lip", "8", &lip );
+ADDRGP4 $591
+ARGP4
+ADDRGP4 $592
+ARGP4
+ADDRLP4 28
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1216
+;1214:
+;1215:	// default damage of 2 points
+;1216:	G_SpawnInt( "dmg", "2", &ent->damage );
+ADDRGP4 $559
+ARGP4
+ADDRGP4 $593
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1219
+;1217:
+;1218:	// first position at start
+;1219:	VectorCopy( ent->s.origin, ent->pos1 );
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1222
+;1220:
+;1221:	// calculate second position
+;1222:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+ARGP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1223
+;1223:	G_SetMovedir (ent->s.angles, ent->movedir);
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 116
+ADDP4
+ARGP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 676
+ADDP4
+ARGP4
+ADDRGP4 G_SetMovedir
+CALLV
+pop
+line 1224
+;1224:	abs_movedir[0] = fabs(ent->movedir[0]);
+ADDRFP4 0
+INDIRP4
+CNSTI4 676
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 48
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0
+ADDRLP4 48
+INDIRF4
+ASGNF4
+line 1225
+;1225:	abs_movedir[1] = fabs(ent->movedir[1]);
+ADDRFP4 0
+INDIRP4
+CNSTI4 680
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 52
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 52
+INDIRF4
+ASGNF4
+line 1226
+;1226:	abs_movedir[2] = fabs(ent->movedir[2]);
+ADDRFP4 0
+INDIRP4
+CNSTI4 684
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 56
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0+8
+ADDRLP4 56
+INDIRF4
+ASGNF4
+line 1227
+;1227:	VectorSubtract( ent->r.maxs, ent->r.mins, size );
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+ADDRLP4 60
+INDIRP4
+CNSTI4 448
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 436
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 12+4
+ADDRLP4 60
+INDIRP4
+CNSTI4 452
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 440
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12+8
+ADDRLP4 64
+INDIRP4
+CNSTI4 456
+ADDP4
+INDIRF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 444
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 1228
+;1228:	distance = DotProduct( abs_movedir, size ) - lip;
+ADDRLP4 24
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12+4
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12+8
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 28
+INDIRF4
+SUBF4
+ASGNF4
+line 1229
+;1229:	VectorMA( ent->pos1, distance, ent->movedir, ent->pos2 );
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+ADDRLP4 68
+INDIRP4
+CNSTI4 676
+ADDP4
+INDIRF4
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 72
+INDIRP4
+CNSTI4 628
+ADDP4
+ADDRLP4 72
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 680
+ADDP4
+INDIRF4
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+ADDRLP4 76
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 76
+INDIRP4
+CNSTI4 632
+ADDP4
+ADDRLP4 76
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+ADDRLP4 76
+INDIRP4
+CNSTI4 684
+ADDP4
+INDIRF4
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+line 1232
+;1230:
+;1231:	// if "start_open", reverse position 1 and 2
+;1232:	if ( ent->spawnflags & 1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 1
+BANDI4
+CNSTI4 0
+EQI4 $602
+line 1235
+;1233:		vec3_t	temp;
+;1234:
+;1235:		VectorCopy( ent->pos2, temp );
+ADDRLP4 80
+ADDRFP4 0
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 1236
+;1236:		VectorCopy( ent->s.origin, ent->pos2 );
+ADDRLP4 92
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 92
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 92
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1237
+;1237:		VectorCopy( temp, ent->pos1 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 80
+INDIRB
+ASGNB 12
+line 1239
+;1238:		// indicate open
+;1239:		ent->bot_chattime = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 1088
+ADDP4
+CNSTI4 1
+ASGNI4
+line 1240
+;1240:	} else {
+ADDRGP4 $603
+JUMPV
+LABELV $602
+line 1241
+;1241:		ent->bot_chattime = 0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 1088
+ADDP4
+CNSTI4 0
+ASGNI4
+line 1242
+;1242:	}
+LABELV $603
+line 1244
+;1243:
+;1244:	InitMover( ent ); 
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1246
+;1245:
+;1246:	if ( ! (ent->flags & FL_TEAMSLAVE ) ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 536
+ADDP4
+INDIRI4
+CNSTI4 1024
+BANDI4
+CNSTI4 0
+NEI4 $604
+line 1249
+;1247:		int health;
+;1248:
+;1249:		G_SpawnInt( "health", "0", &health );
+ADDRGP4 $573
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRLP4 80
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1250
+;1250:		if ( health ) {
+ADDRLP4 80
+INDIRI4
+CNSTI4 0
+EQI4 $606
+line 1251
+;1251:			ent->takedamage = qtrue;
+ADDRFP4 0
+INDIRP4
+CNSTI4 736
+ADDP4
+CNSTI4 1
+ASGNI4
+line 1252
+;1252:		}
+LABELV $606
+line 1253
+;1253:		if ( ent->targetname || health ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 652
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $610
+ADDRLP4 80
+INDIRI4
+CNSTI4 0
+EQI4 $608
+LABELV $610
+line 1255
+;1254:			// non touch/shoot doors
+;1255:			ent->think = Think_MatchTeam;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_MatchTeam
+ASGNP4
+line 1256
+;1256:		}// 7-12-2000 
+ADDRGP4 $609
+JUMPV
+LABELV $608
+line 1257
+;1257:		else { // i decided to keep this doortrigger so bots are able to open them... 
+line 1258
+;1258:			ent->think = Think_SpawnNewDoorTrigger;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_SpawnNewDoorTrigger
+ASGNP4
+line 1259
+;1259:			ent->s.eType = ET_DOOR;
+ADDRFP4 0
+INDIRP4
+CNSTI4 4
+ADDP4
+CNSTI4 15
+ASGNI4
+line 1260
+;1260:		}
+LABELV $609
+line 1261
+;1261:	}
+LABELV $604
+line 1264
+;1262:
+;1263:// 7-12-2000
+;1264:	if (ent->think)
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $611
+line 1265
+;1265:		ent->nextthink = level.time + FRAMETIME;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 100
+ADDI4
+ASGNI4
+LABELV $611
+line 1267
+;1266:// end
+;1267:}
+LABELV $579
+endproc SP_func_door 96 12
+export Touch_Plat
+proc Touch_Plat 4 0
+line 1284
+;1268:
+;1269:/*
+;1270:===============================================================================
+;1271:
+;1272:PLAT
+;1273:
+;1274:===============================================================================
+;1275:*/
+;1276:
+;1277:/*
+;1278:==============
+;1279:Touch_Plat
+;1280:
+;1281:Don't allow decent if a living player is on it
+;1282:===============
+;1283:*/
+;1284:void Touch_Plat( gentity_t *ent, gentity_t *other, trace_t *trace ) {
+line 1285
+;1285:	if ( !other->client || other->client->ps.stats[STAT_HEALTH] <= 0 ) {
+ADDRLP4 0
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $617
+ADDRLP4 0
+INDIRP4
+CNSTI4 184
+ADDP4
+INDIRI4
+CNSTI4 0
+GTI4 $615
+LABELV $617
+line 1286
+;1286:		return;
+ADDRGP4 $614
+JUMPV
+LABELV $615
+line 1290
+;1287:	}
+;1288:
+;1289:	// delay return-to-pos1 by one second
+;1290:	if ( ent->moverState == MOVER_POS2 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $618
+line 1291
+;1291:		ent->nextthink = level.time + 1000;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 1000
+ADDI4
+ASGNI4
+line 1292
+;1292:	}
+LABELV $618
+line 1293
+;1293:}
+LABELV $614
+endproc Touch_Plat 4 0
+export Touch_PlatCenterTrigger
+proc Touch_PlatCenterTrigger 4 12
+line 1302
+;1294:
+;1295:/*
+;1296:==============
+;1297:Touch_PlatCenterTrigger
+;1298:
+;1299:If the plat is at the bottom position, start it going up
+;1300:===============
+;1301:*/
+;1302:void Touch_PlatCenterTrigger(gentity_t *ent, gentity_t *other, trace_t *trace ) {
+line 1303
+;1303:	if ( !other->client ) {
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $622
+line 1304
+;1304:		return;
+ADDRGP4 $621
+JUMPV
+LABELV $622
+line 1307
+;1305:	}
+;1306:
+;1307:	if ( ent->parent->moverState == MOVER_POS1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $624
+line 1308
+;1308:		Use_BinaryMover( ent->parent, ent, other );
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 600
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 1309
+;1309:	}
+LABELV $624
+line 1310
+;1310:}
+LABELV $621
+endproc Touch_PlatCenterTrigger 4 12
+export SpawnPlatTrigger
+proc SpawnPlatTrigger 60 4
+line 1322
+;1311:
+;1312:
+;1313:/*
+;1314:================
+;1315:SpawnPlatTrigger
+;1316:
+;1317:Spawn a trigger in the middle of the plat's low position
+;1318:Elevator cars require that the trigger extend through the entire low position,
+;1319:not just sit on top of it.
+;1320:================
+;1321:*/
+;1322:void SpawnPlatTrigger( gentity_t *ent ) {
+line 1328
+;1323:	gentity_t	*trigger;
+;1324:	vec3_t	tmin, tmax;
+;1325:
+;1326:	// the middle trigger will be a thin trigger just
+;1327:	// above the starting position
+;1328:	trigger = G_Spawn();
+ADDRLP4 28
+ADDRGP4 G_Spawn
+CALLP4
+ASGNP4
+ADDRLP4 12
+ADDRLP4 28
+INDIRP4
+ASGNP4
+line 1329
+;1329:	trigger->touch = Touch_PlatCenterTrigger;
+ADDRLP4 12
+INDIRP4
+CNSTI4 704
+ADDP4
+ADDRGP4 Touch_PlatCenterTrigger
+ASGNP4
+line 1330
+;1330:	trigger->r.contents = CONTENTS_TRIGGER;
+ADDRLP4 12
+INDIRP4
+CNSTI4 460
+ADDP4
+CNSTI4 1073741824
+ASGNI4
+line 1331
+;1331:	trigger->parent = ent;
+ADDRLP4 12
+INDIRP4
+CNSTI4 600
+ADDP4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+line 1333
+;1332:	
+;1333:	tmin[0] = ent->pos1[0] + ent->r.mins[0] + 33;
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 32
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+ADDRLP4 32
+INDIRP4
+CNSTI4 436
+ADDP4
+INDIRF4
+ADDF4
+CNSTF4 1107558400
+ADDF4
+ASGNF4
+line 1334
+;1334:	tmin[1] = ent->pos1[1] + ent->r.mins[1] + 33;
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+4
+ADDRLP4 36
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 440
+ADDP4
+INDIRF4
+ADDF4
+CNSTF4 1107558400
+ADDF4
+ASGNF4
+line 1335
+;1335:	tmin[2] = ent->pos1[2] + ent->r.mins[2];
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 40
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 444
+ADDP4
+INDIRF4
+ADDF4
+ASGNF4
+line 1337
+;1336:
+;1337:	tmax[0] = ent->pos1[0] + ent->r.maxs[0] - 33;
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+ADDRLP4 44
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+ADDRLP4 44
+INDIRP4
+CNSTI4 448
+ADDP4
+INDIRF4
+ADDF4
+CNSTF4 1107558400
+SUBF4
+ASGNF4
+line 1338
+;1338:	tmax[1] = ent->pos1[1] + ent->r.maxs[1] - 33;
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16+4
+ADDRLP4 48
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+ADDRLP4 48
+INDIRP4
+CNSTI4 452
+ADDP4
+INDIRF4
+ADDF4
+CNSTF4 1107558400
+SUBF4
+ASGNF4
+line 1339
+;1339:	tmax[2] = ent->pos1[2] + ent->r.maxs[2] + 8;
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16+8
+ADDRLP4 52
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+ADDRLP4 52
+INDIRP4
+CNSTI4 456
+ADDP4
+INDIRF4
+ADDF4
+CNSTF4 1090519040
+ADDF4
+ASGNF4
+line 1341
+;1340:
+;1341:	if ( tmax[0] <= tmin[0] ) {
+ADDRLP4 16
+INDIRF4
+ADDRLP4 0
+INDIRF4
+GTF4 $631
+line 1342
+;1342:		tmin[0] = ent->pos1[0] + (ent->r.mins[0] + ent->r.maxs[0]) *0.5;
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 56
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+CNSTF4 1056964608
+ADDRLP4 56
+INDIRP4
+CNSTI4 436
+ADDP4
+INDIRF4
+ADDRLP4 56
+INDIRP4
+CNSTI4 448
+ADDP4
+INDIRF4
+ADDF4
+MULF4
+ADDF4
+ASGNF4
+line 1343
+;1343:		tmax[0] = tmin[0] + 1;
+ADDRLP4 16
+ADDRLP4 0
+INDIRF4
+CNSTF4 1065353216
+ADDF4
+ASGNF4
+line 1344
+;1344:	}
+LABELV $631
+line 1345
+;1345:	if ( tmax[1] <= tmin[1] ) {
+ADDRLP4 16+4
+INDIRF4
+ADDRLP4 0+4
+INDIRF4
+GTF4 $633
+line 1346
+;1346:		tmin[1] = ent->pos1[1] + (ent->r.mins[1] + ent->r.maxs[1]) *0.5;
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+4
+ADDRLP4 56
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+CNSTF4 1056964608
+ADDRLP4 56
+INDIRP4
+CNSTI4 440
+ADDP4
+INDIRF4
+ADDRLP4 56
+INDIRP4
+CNSTI4 452
+ADDP4
+INDIRF4
+ADDF4
+MULF4
+ADDF4
+ASGNF4
+line 1347
+;1347:		tmax[1] = tmin[1] + 1;
+ADDRLP4 16+4
+ADDRLP4 0+4
+INDIRF4
+CNSTF4 1065353216
+ADDF4
+ASGNF4
+line 1348
+;1348:	}
+LABELV $633
+line 1350
+;1349:	
+;1350:	VectorCopy (tmin, trigger->r.mins);
+ADDRLP4 12
+INDIRP4
+CNSTI4 436
+ADDP4
+ADDRLP4 0
+INDIRB
+ASGNB 12
+line 1351
+;1351:	VectorCopy (tmax, trigger->r.maxs);
+ADDRLP4 12
+INDIRP4
+CNSTI4 448
+ADDP4
+ADDRLP4 16
+INDIRB
+ASGNB 12
+line 1353
+;1352:
+;1353:	trap_LinkEntity (trigger);
+ADDRLP4 12
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 1354
+;1354:}
+LABELV $626
+endproc SpawnPlatTrigger 60 4
+export SP_func_plat
+proc SP_func_plat 56 12
+line 1368
+;1355:
+;1356:
+;1357:/*QUAKED func_plat (0 .5 .8) ?
+;1358:Plats are always drawn in the extended position so they will light correctly.
+;1359:
+;1360:"lip"		default 8, protrusion above rest position
+;1361:"height"	total height of movement, defaults to model height
+;1362:"speed"		overrides default 200.
+;1363:"dmg"		overrides default 2
+;1364:"model2"	.md3 model to also draw
+;1365:"color"		constantLight color
+;1366:"light"		constantLight radius
+;1367:*/
+;1368:void SP_func_plat (gentity_t *ent) {
+line 1371
+;1369:	float		lip, height;
+;1370:
+;1371:	ent->sound1to2 = ent->sound2to1 = G_SoundIndex("sound/movers/plats/pt1_strt.wav");
+ADDRGP4 $641
+ARGP4
+ADDRLP4 8
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 588
+ADDP4
+ADDRLP4 8
+INDIRI4
+ASGNI4
+ADDRLP4 12
+INDIRP4
+CNSTI4 584
+ADDP4
+ADDRLP4 8
+INDIRI4
+ASGNI4
+line 1372
+;1372:	ent->soundPos1 = ent->soundPos2 = G_SoundIndex("sound/movers/plats/pt1_end.wav");
+ADDRGP4 $642
+ARGP4
+ADDRLP4 16
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 20
+INDIRP4
+CNSTI4 592
+ADDP4
+ADDRLP4 16
+INDIRI4
+ASGNI4
+ADDRLP4 20
+INDIRP4
+CNSTI4 580
+ADDP4
+ADDRLP4 16
+INDIRI4
+ASGNI4
+line 1374
+;1373:
+;1374:	VectorClear (ent->s.angles);
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+CNSTF4 0
+ASGNF4
+ADDRLP4 24
+INDIRP4
+CNSTI4 124
+ADDP4
+ADDRLP4 28
+INDIRF4
+ASGNF4
+ADDRLP4 24
+INDIRP4
+CNSTI4 120
+ADDP4
+ADDRLP4 28
+INDIRF4
+ASGNF4
+ADDRLP4 24
+INDIRP4
+CNSTI4 116
+ADDP4
+ADDRLP4 28
+INDIRF4
+ASGNF4
+line 1376
+;1375:
+;1376:	G_SpawnFloat( "speed", "200", &ent->speed );
+ADDRGP4 $560
+ARGP4
+ADDRGP4 $643
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1377
+;1377:	G_SpawnInt( "dmg", "2", &ent->damage );
+ADDRGP4 $559
+ARGP4
+ADDRGP4 $593
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1378
+;1378:	G_SpawnFloat( "wait", "1", &ent->wait );
+ADDRGP4 $563
+ARGP4
+ADDRGP4 $644
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1379
+;1379:	G_SpawnFloat( "lip", "8", &lip );
+ADDRGP4 $591
+ARGP4
+ADDRGP4 $592
+ARGP4
+ADDRLP4 4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1381
+;1380:
+;1381:	ent->wait = 1000;
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+CNSTF4 1148846080
+ASGNF4
+line 1384
+;1382:
+;1383:	// create second position
+;1384:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ARGP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1386
+;1385:
+;1386:	if ( !G_SpawnFloat( "height", "0", &height ) ) {
+ADDRGP4 $647
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRLP4 0
+ARGP4
+ADDRLP4 36
+ADDRGP4 G_SpawnFloat
+CALLI4
+ASGNI4
+ADDRLP4 36
+INDIRI4
+CNSTI4 0
+NEI4 $645
+line 1387
+;1387:		height = (ent->r.maxs[2] - ent->r.mins[2]) - lip;
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 40
+INDIRP4
+CNSTI4 456
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 444
+ADDP4
+INDIRF4
+SUBF4
+ADDRLP4 4
+INDIRF4
+SUBF4
+ASGNF4
+line 1388
+;1388:	}
+LABELV $645
+line 1391
+;1389:
+;1390:	// pos1 is the rest (bottom) position, pos2 is the top
+;1391:	VectorCopy( ent->s.origin, ent->pos2 );
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1392
+;1392:	VectorCopy( ent->pos2, ent->pos1 );
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 1393
+;1393:	ent->pos1[2] -= height;
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+CNSTI4 620
+ADDP4
+ASGNP4
+ADDRLP4 48
+INDIRP4
+ADDRLP4 48
+INDIRP4
+INDIRF4
+ADDRLP4 0
+INDIRF4
+SUBF4
+ASGNF4
+line 1395
+;1394:
+;1395:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1399
+;1396:
+;1397:	// touch function keeps the plat from returning while
+;1398:	// a live player is standing on it
+;1399:	ent->touch = Touch_Plat;
+ADDRFP4 0
+INDIRP4
+CNSTI4 704
+ADDP4
+ADDRGP4 Touch_Plat
+ASGNP4
+line 1401
+;1400:
+;1401:	ent->blocked = Blocked_Door;
+ADDRFP4 0
+INDIRP4
+CNSTI4 700
+ADDP4
+ADDRGP4 Blocked_Door
+ASGNP4
+line 1403
+;1402:
+;1403:	ent->parent = ent;	// so it can be treated as a door
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 52
+INDIRP4
+CNSTI4 600
+ADDP4
+ADDRLP4 52
+INDIRP4
+ASGNP4
+line 1406
+;1404:
+;1405:	// spawn the trigger if one hasn't been custom made
+;1406:	if ( !ent->targetname ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 652
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $648
+line 1407
+;1407:		SpawnPlatTrigger(ent);
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 SpawnPlatTrigger
+CALLV
+pop
+line 1408
+;1408:	}
+LABELV $648
+line 1409
+;1409:}
+LABELV $640
+endproc SP_func_plat 56 12
+export Touch_Button
+proc Touch_Button 16 12
+line 1426
+;1410:
+;1411:
+;1412:/*
+;1413:===============================================================================
+;1414:
+;1415:BUTTON
+;1416:
+;1417:===============================================================================
+;1418:*/
+;1419:
+;1420:/*
+;1421:==============
+;1422:Touch_Button
+;1423:
+;1424:===============
+;1425:*/
+;1426:void Touch_Button(gentity_t *ent, gentity_t *other, trace_t *trace ) {
+line 1427
+;1427:	if ( !other->client ) {
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $651
+line 1428
+;1428:		return;
+ADDRGP4 $650
+JUMPV
+LABELV $651
+line 1431
+;1429:	}
+;1430:	// if game is open
+;1431:	if (GameState == STATE_OPEN && g_gametype.integer == GT_LTS)
+ADDRGP4 GameState
+INDIRI4
+CNSTI4 0
+NEI4 $653
+ADDRGP4 g_gametype+12
+INDIRI4
+CNSTI4 3
+NEI4 $653
+line 1432
+;1432:		return;
+ADDRGP4 $650
+JUMPV
+LABELV $653
+line 1435
+;1433:	
+;1434:	// e 2 - means free 
+;1435:	if (ent->ns_team != 2 && !Is_OnBrushTeam(ent,other) )
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 808
+ADDP4
+INDIRI4
+CNSTI4 2
+EQI4 $656
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRFP4 4
+INDIRP4
+ARGP4
+ADDRLP4 4
+ADDRGP4 Is_OnBrushTeam
+CALLI4
+ASGNI4
+ADDRLP4 4
+INDIRI4
+CNSTI4 0
+NEI4 $656
+line 1436
+;1436:		return;
+ADDRGP4 $650
+JUMPV
+LABELV $656
+line 1438
+;1437:
+;1438:	if ( other->client && !( other->client->buttons & BUTTON_USE ) )
+ADDRLP4 8
+ADDRFP4 4
+INDIRP4
+CNSTI4 516
+ADDP4
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $658
+ADDRLP4 8
+INDIRP4
+CNSTI4 1848
+ADDP4
+INDIRI4
+CNSTI4 4
+BANDI4
+CNSTI4 0
+NEI4 $658
+line 1439
+;1439:		return;
+ADDRGP4 $650
+JUMPV
+LABELV $658
+line 1441
+;1440:
+;1441:	if ( ent->moverState == MOVER_POS1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $660
+line 1442
+;1442:		Use_BinaryMover( ent, other, other );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRLP4 12
+ADDRFP4 4
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+ARGP4
+ADDRLP4 12
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 1443
+;1443:	}
+LABELV $660
+line 1445
+;1444:
+;1445:	G_UseTargets( ent, NULL);
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTP4 0
+ARGP4
+ADDRGP4 G_UseTargets
+CALLV
+pop
+line 1446
+;1446:}
+LABELV $650
+endproc Touch_Button 16 12
+export SP_func_button
+proc SP_func_button 84 12
+line 1462
+;1447:
+;1448:
+;1449:/*QUAKED func_button (0 .5 .8) ?
+;1450:When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again.
+;1451:
+;1452:"model2"	.md3 model to also draw
+;1453:"angle"		determines the opening direction
+;1454:"target"	all entities with a matching targetname will be used
+;1455:"speed"		override the default 40 speed
+;1456:"wait"		override the default 1 second wait (-1 = never return)
+;1457:"lip"		override the default 4 pixel lip remaining at end of move
+;1458:"health"	if set, the button must be killed instead of touched
+;1459:"color"		constantLight color
+;1460:"light"		constantLight radius
+;1461:*/
+;1462:void SP_func_button( gentity_t *ent ) {
+line 1469
+;1463:	vec3_t		abs_movedir;
+;1464:	float		distance;
+;1465:	vec3_t		size;
+;1466:	float		lip;
+;1467:	int bla;
+;1468:
+;1469:	G_SpawnInt("team","2", &ent->ns_team);
+ADDRGP4 $663
+ARGP4
+ADDRGP4 $593
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 808
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1470
+;1470:	G_SpawnInt("elevator_index", "0", &bla);
+ADDRGP4 $549
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRLP4 32
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1471
+;1471:	ent->elevator_index = bla;
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+ADDRLP4 32
+INDIRI4
+ASGNI4
+line 1475
+;1472:
+;1473://	ent->sound1to2 = G_SoundIndex("sound/movers/switches/butn2.wav");
+;1474:	
+;1475:	if ( !ent->speed ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $664
+line 1476
+;1476:		ent->speed = 40;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1109393408
+ASGNF4
+line 1477
+;1477:	}
+LABELV $664
+line 1479
+;1478:
+;1479:	if ( !ent->wait ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $666
+line 1480
+;1480:		ent->wait = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+CNSTF4 1065353216
+ASGNF4
+line 1481
+;1481:	}
+LABELV $666
+line 1482
+;1482:	ent->wait *= 1000;
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+CNSTF4 1148846080
+ADDRLP4 36
+INDIRP4
+INDIRF4
+MULF4
+ASGNF4
+line 1485
+;1483:
+;1484:	 //first position
+;1485:	VectorCopy( ent->s.origin, ent->pos1 );
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1488
+;1486:
+;1487:	// calculate second position
+;1488:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 44
+INDIRP4
+ARGP4
+ADDRLP4 44
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1490
+;1489:
+;1490:	G_SpawnFloat( "lip", "4", &lip );
+ADDRGP4 $591
+ARGP4
+ADDRGP4 $668
+ARGP4
+ADDRLP4 28
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1491
+;1491:	G_SetMovedir( ent->s.angles, ent->movedir );
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 48
+INDIRP4
+CNSTI4 116
+ADDP4
+ARGP4
+ADDRLP4 48
+INDIRP4
+CNSTI4 676
+ADDP4
+ARGP4
+ADDRGP4 G_SetMovedir
+CALLV
+pop
+line 1492
+;1492:	abs_movedir[0] = fabs(ent->movedir[0]);
+ADDRFP4 0
+INDIRP4
+CNSTI4 676
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 52
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0
+ADDRLP4 52
+INDIRF4
+ASGNF4
+line 1493
+;1493:	abs_movedir[1] = fabs(ent->movedir[1]);
+ADDRFP4 0
+INDIRP4
+CNSTI4 680
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 56
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 56
+INDIRF4
+ASGNF4
+line 1494
+;1494:	abs_movedir[2] = fabs(ent->movedir[2]);
+ADDRFP4 0
+INDIRP4
+CNSTI4 684
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 60
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0+8
+ADDRLP4 60
+INDIRF4
+ASGNF4
+line 1495
+;1495:	VectorSubtract( ent->r.maxs, ent->r.mins, size );
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+ADDRLP4 64
+INDIRP4
+CNSTI4 448
+ADDP4
+INDIRF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 436
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 12+4
+ADDRLP4 64
+INDIRP4
+CNSTI4 452
+ADDP4
+INDIRF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 440
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12+8
+ADDRLP4 68
+INDIRP4
+CNSTI4 456
+ADDP4
+INDIRF4
+ADDRLP4 68
+INDIRP4
+CNSTI4 444
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 1496
+;1496:	distance = abs_movedir[0] * size[0] + abs_movedir[1] * size[1] + abs_movedir[2] * size[2] - lip;
+ADDRLP4 24
+ADDRLP4 0
+INDIRF4
+ADDRLP4 12
+INDIRF4
+MULF4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 12+4
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 12+8
+INDIRF4
+MULF4
+ADDF4
+ADDRLP4 28
+INDIRF4
+SUBF4
+ASGNF4
+line 1497
+;1497:	VectorMA (ent->pos1, distance, ent->movedir, ent->pos2);
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 72
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 72
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 676
+ADDP4
+INDIRF4
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+ADDRLP4 76
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 76
+INDIRP4
+CNSTI4 628
+ADDP4
+ADDRLP4 76
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+ADDRLP4 76
+INDIRP4
+CNSTI4 680
+ADDP4
+INDIRF4
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+ADDRLP4 80
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 80
+INDIRP4
+CNSTI4 632
+ADDP4
+ADDRLP4 80
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+ADDRLP4 80
+INDIRP4
+CNSTI4 684
+ADDP4
+INDIRF4
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDF4
+ASGNF4
+line 1499
+;1498:
+;1499:	if (ent->health) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 732
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $677
+line 1501
+;1500:		// shootable button
+;1501:		ent->takedamage = qtrue;
+ADDRFP4 0
+INDIRP4
+CNSTI4 736
+ADDP4
+CNSTI4 1
+ASGNI4
+line 1502
+;1502:	} else {
+ADDRGP4 $678
+JUMPV
+LABELV $677
+line 1504
+;1503:		// touchable button
+;1504:		ent->touch = Touch_Button;
+ADDRFP4 0
+INDIRP4
+CNSTI4 704
+ADDP4
+ADDRGP4 Touch_Button
+ASGNP4
+line 1505
+;1505:	}
+LABELV $678
+line 1507
+;1506:
+;1507:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1508
+;1508:}
+LABELV $662
+endproc SP_func_button 84 12
+export Think_BeginMoving
+proc Think_BeginMoving 0 0
+line 1532
+;1509:
+;1510:
+;1511:
+;1512:/*
+;1513:===============================================================================
+;1514:
+;1515:TRAIN
+;1516:
+;1517:===============================================================================
+;1518:*/
+;1519:
+;1520:
+;1521:#define TRAIN_START_ON		1
+;1522:#define TRAIN_TOGGLE		2
+;1523:#define TRAIN_BLOCK_STOPS	4
+;1524:
+;1525:/*
+;1526:===============
+;1527:Think_BeginMoving
+;1528:
+;1529:The wait time at a corner has completed, so start moving again
+;1530:===============
+;1531:*/
+;1532:void Think_BeginMoving( gentity_t *ent ) {
+line 1533
+;1533:	ent->s.pos.trTime = level.time;
+ADDRFP4 0
+INDIRP4
+CNSTI4 16
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+ASGNI4
+line 1534
+;1534:	ent->s.pos.trType = TR_LINEAR_STOP;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 3
+ASGNI4
+line 1535
+;1535:}
+LABELV $679
+endproc Think_BeginMoving 0 0
+export Reached_Train
+proc Reached_Train 48 12
+line 1542
+;1536:
+;1537:/*
+;1538:===============
+;1539:Reached_Train
+;1540:===============
+;1541:*/
+;1542:void Reached_Train( gentity_t *ent ) {
+line 1549
+;1543:	gentity_t		*next;
+;1544:	float			speed;
+;1545:	vec3_t			move;
+;1546:	float			length;
+;1547:
+;1548:	// copy the apropriate values
+;1549:	next = ent->nextTrain;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+CNSTI4 604
+ADDP4
+INDIRP4
+ASGNP4
+line 1550
+;1550:	if ( !next || !next->nextTrain ) {
+ADDRLP4 28
+CNSTU4 0
+ASGNU4
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+ADDRLP4 28
+INDIRU4
+EQU4 $684
+ADDRLP4 0
+INDIRP4
+CNSTI4 604
+ADDP4
+INDIRP4
+CVPU4 4
+ADDRLP4 28
+INDIRU4
+NEU4 $682
+LABELV $684
+line 1551
+;1551:		return;		// just stop
+ADDRGP4 $681
+JUMPV
+LABELV $682
+line 1555
+;1552:	}
+;1553:
+;1554:	// fire all other targets
+;1555:	G_UseTargets( next, NULL );
+ADDRLP4 0
+INDIRP4
+ARGP4
+CNSTP4 0
+ARGP4
+ADDRGP4 G_UseTargets
+CALLV
+pop
+line 1558
+;1556:
+;1557:	// set the new trajectory
+;1558:	ent->nextTrain = next->nextTrain;
+ADDRLP4 32
+CNSTI4 604
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 32
+INDIRI4
+ADDP4
+ADDRLP4 0
+INDIRP4
+ADDRLP4 32
+INDIRI4
+ADDP4
+INDIRP4
+ASGNP4
+line 1559
+;1559:	VectorCopy( next->s.origin, ent->pos1 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1560
+;1560:	VectorCopy( next->nextTrain->s.origin, ent->pos2 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 604
+ADDP4
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1563
+;1561:
+;1562:	// if the path_corner has a speed, use that
+;1563:	if ( next->speed ) {
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+EQF4 $685
+line 1564
+;1564:		speed = next->speed;
+ADDRLP4 16
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 1565
+;1565:	} else {
+ADDRGP4 $686
+JUMPV
+LABELV $685
+line 1567
+;1566:		// otherwise use the train's speed
+;1567:		speed = ent->speed;
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 1568
+;1568:	}
+LABELV $686
+line 1569
+;1569:	if ( speed < 1 ) {
+ADDRLP4 16
+INDIRF4
+CNSTF4 1065353216
+GEF4 $687
+line 1570
+;1570:		speed = 1;
+ADDRLP4 16
+CNSTF4 1065353216
+ASGNF4
+line 1571
+;1571:	}
+LABELV $687
+line 1575
+;1572:
+;1573:	// calculate duration
+;1574:
+;1575:	VectorSubtract( ent->pos2, ent->pos1, move );
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+ADDRLP4 36
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 4+4
+ADDRLP4 36
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 36
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4+8
+ADDRLP4 40
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 1576
+;1576:	length = VectorLength( move );
+ADDRLP4 4
+ARGP4
+ADDRLP4 44
+ADDRGP4 VectorLength
+CALLF4
+ASGNF4
+ADDRLP4 20
+ADDRLP4 44
+INDIRF4
+ASGNF4
+line 1578
+;1577:  
+;1578:	ent->s.pos.trDuration = length * 1000 / speed;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 20
+INDIRF4
+MULF4
+ADDRLP4 16
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 1581
+;1579: 
+;1580:	// looping sound
+;1581:	ent->s.loopSound = next->soundLoop;
+ADDRFP4 0
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 1584
+;1582:
+;1583:	// start it going
+;1584:	SetMoverState( ent, MOVER_1TO2, level.time );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 2
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 1587
+;1585:
+;1586:	// if there is a "wait" value on the target, don't start moving yet
+;1587:	if ( next->wait ) {
+ADDRLP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+CNSTF4 0
+EQF4 $692
+line 1588
+;1588:		ent->nextthink = level.time + next->wait * 1000;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CVIF4 4
+CNSTF4 1148846080
+ADDRLP4 0
+INDIRP4
+CNSTI4 796
+ADDP4
+INDIRF4
+MULF4
+ADDF4
+CVFI4 4
+ASGNI4
+line 1589
+;1589:		ent->think = Think_BeginMoving;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_BeginMoving
+ASGNP4
+line 1590
+;1590:		ent->s.pos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 0
+ASGNI4
+line 1591
+;1591:	}
+LABELV $692
+line 1592
+;1592:}
+LABELV $681
+endproc Reached_Train 48 12
+export Think_SetupTrainTargets
+proc Think_SetupTrainTargets 28 12
+line 1602
+;1593:
+;1594:
+;1595:/*
+;1596:===============
+;1597:Think_SetupTrainTargets
+;1598:
+;1599:Link all the corners together
+;1600:===============
+;1601:*/
+;1602:void Think_SetupTrainTargets( gentity_t *ent ) {
+line 1605
+;1603:	gentity_t		*path, *next, *start;
+;1604:
+;1605:	ent->nextTrain = G_Find( NULL, FOFS(targetname), ent->target );
+CNSTP4 0
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 16
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 604
+ADDP4
+ADDRLP4 16
+INDIRP4
+ASGNP4
+line 1606
+;1606:	if ( !ent->nextTrain ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 604
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $696
+line 1607
+;1607:		G_Printf( "func_train at %s with an unfound target\n",
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ARGP4
+ADDRLP4 20
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $698
+ARGP4
+ADDRLP4 20
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1609
+;1608:			vtos(ent->r.absmin) );
+;1609:		return;
+ADDRGP4 $695
+JUMPV
+LABELV $696
+line 1612
+;1610:	}
+;1611:
+;1612:	start = NULL;
+ADDRLP4 8
+CNSTP4 0
+ASGNP4
+line 1613
+;1613:	for ( path = ent->nextTrain ; path != start ; path = next ) {
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+CNSTI4 604
+ADDP4
+INDIRP4
+ASGNP4
+ADDRGP4 $702
+JUMPV
+LABELV $699
+line 1614
+;1614:		if ( !start ) {
+ADDRLP4 8
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $703
+line 1615
+;1615:			start = path;
+ADDRLP4 8
+ADDRLP4 4
+INDIRP4
+ASGNP4
+line 1616
+;1616:		}
+LABELV $703
+line 1618
+;1617:
+;1618:		if ( !path->target ) {
+ADDRLP4 4
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $705
+line 1619
+;1619:			G_Printf( "Train corner at %s without a target\n",
+ADDRLP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+ARGP4
+ADDRLP4 20
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $707
+ARGP4
+ADDRLP4 20
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1621
+;1620:				vtos(path->s.origin) );
+;1621:			return;
+ADDRGP4 $695
+JUMPV
+LABELV $705
+line 1627
+;1622:		}
+;1623:
+;1624:		// find a path_corner among the targets
+;1625:		// there may also be other targets that get fired when the corner
+;1626:		// is reached
+;1627:		next = NULL;
+ADDRLP4 0
+CNSTP4 0
+ASGNP4
+LABELV $708
+line 1628
+;1628:		do {
+line 1629
+;1629:			next = G_Find( next, FOFS(targetname), path->target );
+ADDRLP4 0
+INDIRP4
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRLP4 4
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 20
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 20
+INDIRP4
+ASGNP4
+line 1630
+;1630:			if ( !next ) {
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $711
+line 1631
+;1631:				G_Printf( "Train corner at %s without a target path_corner\n",
+ADDRLP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+ARGP4
+ADDRLP4 24
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $713
+ARGP4
+ADDRLP4 24
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1633
+;1632:					vtos(path->s.origin) );
+;1633:				return;
+ADDRGP4 $695
+JUMPV
+LABELV $711
+line 1635
+;1634:			}
+;1635:		} while ( strcmp( next->classname, "path_corner" ) );
+LABELV $709
+ADDRLP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $714
+ARGP4
+ADDRLP4 20
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 20
+INDIRI4
+CNSTI4 0
+NEI4 $708
+line 1637
+;1636:
+;1637:		path->nextTrain = next;
+ADDRLP4 4
+INDIRP4
+CNSTI4 604
+ADDP4
+ADDRLP4 0
+INDIRP4
+ASGNP4
+line 1638
+;1638:	}
+LABELV $700
+line 1613
+ADDRLP4 4
+ADDRLP4 0
+INDIRP4
+ASGNP4
+LABELV $702
+ADDRLP4 4
+INDIRP4
+CVPU4 4
+ADDRLP4 8
+INDIRP4
+CVPU4 4
+NEU4 $699
+line 1641
+;1639:
+;1640:	// start the train moving from the first corner
+;1641:	Reached_Train( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 Reached_Train
+CALLV
+pop
+line 1642
+;1642:}
+LABELV $695
+endproc Think_SetupTrainTargets 28 12
+export SP_path_corner
+proc SP_path_corner 4 8
+line 1652
+;1643:
+;1644:
+;1645:
+;1646:/*QUAKED path_corner (.5 .3 0) (-8 -8 -8) (8 8 8)
+;1647:Train path corners.
+;1648:Target: next path corner and other targets to fire
+;1649:"speed" speed to move to the next corner
+;1650:"wait" seconds to wait before behining move to next corner
+;1651:*/
+;1652:void SP_path_corner( gentity_t *self ) { 
+line 1653
+;1653:	if ( !self->targetname ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 652
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $716
+line 1654
+;1654:		G_Printf ("path_corner with no targetname at %s\n", vtos(self->s.origin));
+ADDRFP4 0
+INDIRP4
+CNSTI4 92
+ADDP4
+ARGP4
+ADDRLP4 0
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $718
+ARGP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1655
+;1655:		G_FreeEntity( self );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_FreeEntity
+CALLV
+pop
+line 1656
+;1656:		return;
+LABELV $716
+line 1659
+;1657:	}
+;1658:	// path corners don't need to be linked in
+;1659:}
+LABELV $715
+endproc SP_path_corner 4 8
+export SP_func_train
+proc SP_func_train 12 8
+line 1675
+;1660:
+;1661:
+;1662:
+;1663:/*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS
+;1664:A train is a mover that moves between path_corner target points.
+;1665:Trains MUST HAVE AN ORIGIN BRUSH.
+;1666:The train spawns at the first target it is pointing at.
+;1667:"model2"	.md3 model to also draw
+;1668:"speed"		default 100
+;1669:"dmg"		default	2
+;1670:"noise"		looping sound to play when the train is in motion
+;1671:"target"	next path corner
+;1672:"color"		constantLight color
+;1673:"light"		constantLight radius
+;1674:*/
+;1675:void SP_func_train (gentity_t *self) {
+line 1676
+;1676:	VectorClear (self->s.angles);
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+CNSTF4 0
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 124
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 120
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 116
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+line 1678
+;1677:
+;1678:	if (self->spawnflags & TRAIN_BLOCK_STOPS) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 4
+BANDI4
+CNSTI4 0
+EQI4 $720
+line 1679
+;1679:		self->damage = 0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+CNSTI4 0
+ASGNI4
+line 1680
+;1680:	} else {
+ADDRGP4 $721
+JUMPV
+LABELV $720
+line 1681
+;1681:		if (!self->damage) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $722
+line 1682
+;1682:			self->damage = 2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+CNSTI4 2
+ASGNI4
+line 1683
+;1683:		}
+LABELV $722
+line 1684
+;1684:	}
+LABELV $721
+line 1686
+;1685:
+;1686:	if ( !self->speed ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $724
+line 1687
+;1687:		self->speed = 100;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1120403456
+ASGNF4
+line 1688
+;1688:	}
+LABELV $724
+line 1690
+;1689:
+;1690:	if ( !self->target ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $726
+line 1691
+;1691:		G_Printf ("func_train without a target at %s\n", vtos(self->r.absmin));
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ARGP4
+ADDRLP4 8
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $728
+ARGP4
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1692
+;1692:		G_FreeEntity( self );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_FreeEntity
+CALLV
+pop
+line 1693
+;1693:		return;
+ADDRGP4 $719
+JUMPV
+LABELV $726
+line 1696
+;1694:	}
+;1695:
+;1696:	trap_SetBrushModel( self, self->model );
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1697
+;1697:	InitMover( self );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1699
+;1698:
+;1699:	self->reached = Reached_Train;
+ADDRFP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+ADDRGP4 Reached_Train
+ASGNP4
+line 1703
+;1700:
+;1701:	// start trains on the second frame, to make sure their targets have had
+;1702:	// a chance to spawn
+;1703:	self->nextthink = level.time + FRAMETIME;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 100
+ADDI4
+ASGNI4
+line 1704
+;1704:	self->think = Think_SetupTrainTargets;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_SetupTrainTargets
+ASGNP4
+line 1705
+;1705:}
+LABELV $719
+endproc SP_func_train 12 8
+export SP_func_static
+proc SP_func_static 12 8
+line 1722
+;1706:
+;1707:/*
+;1708:===============================================================================
+;1709:
+;1710:STATIC
+;1711:
+;1712:===============================================================================
+;1713:*/
+;1714:
+;1715:
+;1716:/*QUAKED func_static (0 .5 .8) ?
+;1717:A bmodel that just sits there, doing nothing.  Can be used for conditional walls and models.
+;1718:"model2"	.md3 model to also draw
+;1719:"color"		constantLight color
+;1720:"light"		constantLight radius
+;1721:*/
+;1722:void SP_func_static( gentity_t *ent ) {
+line 1723
+;1723:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1724
+;1724:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1725
+;1725:	VectorCopy( ent->s.origin, ent->s.pos.trBase );
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1726
+;1726:	VectorCopy( ent->s.origin, ent->r.currentOrigin );
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1727
+;1727:}
+LABELV $730
+endproc SP_func_static 12 8
+export SP_func_rotating
+proc SP_func_rotating 16 8
+line 1750
+;1728:
+;1729:
+;1730:/*
+;1731:===============================================================================
+;1732:
+;1733:ROTATING
+;1734:
+;1735:===============================================================================
+;1736:*/
+;1737:
+;1738:
+;1739:/*QUAKED func_rotating (0 .5 .8) ? START_ON - X_AXIS Y_AXIS
+;1740:You need to have an origin brush as part of this entity.  The center of that brush will be
+;1741:the point around which it is rotated. It will rotate around the Z axis by default.  You can
+;1742:check either the X_AXIS or Y_AXIS box to change that.
+;1743:
+;1744:"model2"	.md3 model to also draw
+;1745:"speed"		determines how fast it moves; default value is 100.
+;1746:"dmg"		damage to inflict when blocked (2 default)
+;1747:"color"		constantLight color
+;1748:"light"		constantLight radius
+;1749:*/
+;1750:void SP_func_rotating (gentity_t *ent) {
+line 1751
+;1751:	if ( !ent->speed ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $732
+line 1752
+;1752:		ent->speed = 100;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1120403456
+ASGNF4
+line 1753
+;1753:	}
+LABELV $732
+line 1756
+;1754:
+;1755:	// set the axis of rotation
+;1756:	ent->s.apos.trType = TR_LINEAR;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 2
+ASGNI4
+line 1757
+;1757:	if ( ent->spawnflags & 4 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 4
+BANDI4
+CNSTI4 0
+EQI4 $734
+line 1758
+;1758:		ent->s.apos.trDelta[2] = ent->speed;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 1759
+;1759:	} else if ( ent->spawnflags & 8 ) {
+ADDRGP4 $735
+JUMPV
+LABELV $734
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 8
+BANDI4
+CNSTI4 0
+EQI4 $736
+line 1760
+;1760:		ent->s.apos.trDelta[0] = ent->speed;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 72
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 1761
+;1761:	} else {
+ADDRGP4 $737
+JUMPV
+LABELV $736
+line 1762
+;1762:		ent->s.apos.trDelta[1] = ent->speed;
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 76
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 1763
+;1763:	}
+LABELV $737
+LABELV $735
+line 1765
+;1764:
+;1765:	if (!ent->damage) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $738
+line 1766
+;1766:		ent->damage = 2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+CNSTI4 2
+ASGNI4
+line 1767
+;1767:	}
+LABELV $738
+line 1769
+;1768:
+;1769:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1770
+;1770:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1772
+;1771:
+;1772:	VectorCopy( ent->s.origin, ent->s.pos.trBase );
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1773
+;1773:	VectorCopy( ent->s.pos.trBase, ent->r.currentOrigin );
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 24
+ADDP4
+INDIRB
+ASGNB 12
+line 1774
+;1774:	VectorCopy( ent->s.apos.trBase, ent->r.currentAngles );
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 500
+ADDP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 60
+ADDP4
+INDIRB
+ASGNB 12
+line 1776
+;1775:
+;1776:	trap_LinkEntity( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 1777
+;1777:}
+LABELV $731
+endproc SP_func_rotating 16 8
+export SP_func_bobbing
+proc SP_func_bobbing 28 12
+line 1799
+;1778:
+;1779:
+;1780:/*
+;1781:===============================================================================
+;1782:
+;1783:BOBBING
+;1784:
+;1785:===============================================================================
+;1786:*/
+;1787:
+;1788:
+;1789:/*QUAKED func_bobbing (0 .5 .8) ? X_AXIS Y_AXIS
+;1790:Normally bobs on the Z axis
+;1791:"model2"	.md3 model to also draw
+;1792:"height"	amplitude of bob (32 default)
+;1793:"speed"		seconds to complete a bob cycle (4 default)
+;1794:"phase"		the 0.0 to 1.0 offset in the cycle to start at
+;1795:"dmg"		damage to inflict when blocked (2 default)
+;1796:"color"		constantLight color
+;1797:"light"		constantLight radius
+;1798:*/
+;1799:void SP_func_bobbing (gentity_t *ent) {
+line 1803
+;1800:	float		height;
+;1801:	float		phase;
+;1802:
+;1803:	G_SpawnFloat( "speed", "4", &ent->speed );
+ADDRGP4 $560
+ARGP4
+ADDRGP4 $668
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1804
+;1804:	G_SpawnFloat( "height", "32", &height );
+ADDRGP4 $647
+ARGP4
+ADDRGP4 $741
+ARGP4
+ADDRLP4 0
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1805
+;1805:	G_SpawnInt( "dmg", "2", &ent->damage );
+ADDRGP4 $559
+ARGP4
+ADDRGP4 $593
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1806
+;1806:	G_SpawnFloat( "phase", "0", &phase );
+ADDRGP4 $742
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRLP4 4
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1808
+;1807:
+;1808:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+ARGP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1809
+;1809:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1811
+;1810:
+;1811:	VectorCopy( ent->s.origin, ent->s.pos.trBase );
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1812
+;1812:	VectorCopy( ent->s.origin, ent->r.currentOrigin );
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1814
+;1813:
+;1814:	ent->s.pos.trDuration = ent->speed * 1000;
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 20
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 20
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 1815
+;1815:	ent->s.pos.trTime = ent->s.pos.trDuration * phase;
+ADDRLP4 24
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 16
+ADDP4
+ADDRLP4 24
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CVIF4 4
+ADDRLP4 4
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 1816
+;1816:	ent->s.pos.trType = TR_SINE;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 4
+ASGNI4
+line 1819
+;1817:
+;1818:	// set the axis of bobbing
+;1819:	if ( ent->spawnflags & 1 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 1
+BANDI4
+CNSTI4 0
+EQI4 $743
+line 1820
+;1820:		ent->s.pos.trDelta[0] = height;
+ADDRFP4 0
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ASGNF4
+line 1821
+;1821:	} else if ( ent->spawnflags & 2 ) {
+ADDRGP4 $744
+JUMPV
+LABELV $743
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 2
+BANDI4
+CNSTI4 0
+EQI4 $745
+line 1822
+;1822:		ent->s.pos.trDelta[1] = height;
+ADDRFP4 0
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0
+INDIRF4
+ASGNF4
+line 1823
+;1823:	} else {
+ADDRGP4 $746
+JUMPV
+LABELV $745
+line 1824
+;1824:		ent->s.pos.trDelta[2] = height;
+ADDRFP4 0
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0
+INDIRF4
+ASGNF4
+line 1825
+;1825:	}
+LABELV $746
+LABELV $744
+line 1826
+;1826:}
+LABELV $740
+endproc SP_func_bobbing 28 12
+export SP_func_pendulum
+proc SP_func_pendulum 44 12
+line 1848
+;1827:
+;1828:/*
+;1829:===============================================================================
+;1830:
+;1831:PENDULUM
+;1832:
+;1833:===============================================================================
+;1834:*/
+;1835:
+;1836:
+;1837:/*QUAKED func_pendulum (0 .5 .8) ?
+;1838:You need to have an origin brush as part of this entity.
+;1839:Pendulums always swing north / south on unrotated models.  Add an angles field to the model to allow rotation in other directions.
+;1840:Pendulum frequency is a physical constant based on the length of the beam and gravity.
+;1841:"model2"	.md3 model to also draw
+;1842:"speed"		the number of degrees each way the pendulum swings, (30 default)
+;1843:"phase"		the 0.0 to 1.0 offset in the cycle to start at
+;1844:"dmg"		damage to inflict when blocked (2 default)
+;1845:"color"		constantLight color
+;1846:"light"		constantLight radius
+;1847:*/
+;1848:void SP_func_pendulum(gentity_t *ent) {
+line 1854
+;1849:	float		freq;
+;1850:	float		length;
+;1851:	float		phase;
+;1852:	float		speed;
+;1853:
+;1854:	G_SpawnFloat( "speed", "30", &speed );
+ADDRGP4 $560
+ARGP4
+ADDRGP4 $748
+ARGP4
+ADDRLP4 12
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1855
+;1855:	G_SpawnInt( "dmg", "2", &ent->damage );
+ADDRGP4 $559
+ARGP4
+ADDRGP4 $593
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1856
+;1856:	G_SpawnFloat( "phase", "0", &phase );
+ADDRGP4 $742
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRLP4 8
+ARGP4
+ADDRGP4 G_SpawnFloat
+CALLI4
+pop
+line 1858
+;1857:
+;1858:	trap_SetBrushModel( ent, ent->model );
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+ARGP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1861
+;1859:
+;1860:	// find pendulum length
+;1861:	length = fabs( ent->r.mins[2] );
+ADDRFP4 0
+INDIRP4
+CNSTI4 444
+ADDP4
+INDIRF4
+ARGF4
+ADDRLP4 20
+ADDRGP4 fabs
+CALLF4
+ASGNF4
+ADDRLP4 0
+ADDRLP4 20
+INDIRF4
+ASGNF4
+line 1862
+;1862:	if ( length < 8 ) {
+ADDRLP4 0
+INDIRF4
+CNSTF4 1090519040
+GEF4 $749
+line 1863
+;1863:		length = 8;
+ADDRLP4 0
+CNSTF4 1090519040
+ASGNF4
+line 1864
+;1864:	}
+LABELV $749
+line 1866
+;1865:
+;1866:	freq = 1 / ( M_PI * 2 ) * sqrt( g_gravity.value / ( 3 * length ) );
+ADDRGP4 g_gravity+8
+INDIRF4
+CNSTF4 1077936128
+ADDRLP4 0
+INDIRF4
+MULF4
+DIVF4
+ARGF4
+ADDRLP4 24
+ADDRGP4 sqrt
+CALLF4
+ASGNF4
+ADDRLP4 4
+CNSTF4 1042479491
+ADDRLP4 24
+INDIRF4
+MULF4
+ASGNF4
+line 1868
+;1867:
+;1868:	ent->s.pos.trDuration = ( 1000 / freq );
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 1870
+;1869:
+;1870:	InitMover( ent );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1872
+;1871:
+;1872:	VectorCopy( ent->s.origin, ent->s.pos.trBase );
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1873
+;1873:	VectorCopy( ent->s.origin, ent->r.currentOrigin );
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 32
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 1875
+;1874:
+;1875:	VectorCopy( ent->s.angles, ent->s.apos.trBase );
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 60
+ADDP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 116
+ADDP4
+INDIRB
+ASGNB 12
+line 1877
+;1876:
+;1877:	ent->s.apos.trDuration = 1000 / freq;
+ADDRFP4 0
+INDIRP4
+CNSTI4 56
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 1878
+;1878:	ent->s.apos.trTime = ent->s.apos.trDuration * phase;
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 52
+ADDP4
+ADDRLP4 40
+INDIRP4
+CNSTI4 56
+ADDP4
+INDIRI4
+CVIF4 4
+ADDRLP4 8
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 1879
+;1879:	ent->s.apos.trType = TR_SINE;
+ADDRFP4 0
+INDIRP4
+CNSTI4 48
+ADDP4
+CNSTI4 4
+ASGNI4
+line 1880
+;1880:	ent->s.apos.trDelta[2] = speed;
+ADDRFP4 0
+INDIRP4
+CNSTI4 80
+ADDP4
+ADDRLP4 12
+INDIRF4
+ASGNF4
+line 1881
+;1881:}
+LABELV $747
+endproc SP_func_pendulum 44 12
+export AmmoTrain_Die
+proc AmmoTrain_Die 0 4
+line 1900
+;1882:
+;1883:/*QUAKED func_ammo_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS
+;1884:When the ammotrain is destroyed, the opposite team wins.
+;1885:if the "team" flag is "1" (tangos) then the "0" (seals) win...
+;1886:A train is a mover that moves between path_corner target points.
+;1887:Trains MUST HAVE AN ORIGIN BRUSH.
+;1888:The train spawns at the first target it is pointing at.
+;1889:"model2"	.md3 model to also draw
+;1890:"speed"		default 100
+;1891:"dmg"		default	2
+;1892:"noise"		looping sound to play when the train is in motion
+;1893:"target"	next path corner
+;1894:"color"		constantLight color
+;1895:"light"		constantLight radius
+;1896:"team"		the team it belongs to (0 seals 1 tangos) [must set]
+;1897:"health"	default 100
+;1898:*/
+;1899:void AmmoTrain_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath )
+;1900:{
+line 1901
+;1901:	G_Printf("ammo train is dead");
+ADDRGP4 $753
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1904
+;1902:
+;1903:	// don't move anymore
+;1904:	self->nextthink = 0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+CNSTI4 0
+ASGNI4
+line 1905
+;1905:	self->speed = 0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 0
+ASGNF4
+line 1906
+;1906:}
+LABELV $752
+endproc AmmoTrain_Die 0 4
+export SP_func_ammo_train
+proc SP_func_ammo_train 20 12
+line 1908
+;1907:
+;1908:void SP_func_ammo_train (gentity_t *self) {
+line 1909
+;1909:	G_SpawnInt( "team", "0", &self->ns_team);
+ADDRGP4 $663
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 808
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1910
+;1910:	G_SpawnInt("health", "500", &self->health );
+ADDRGP4 $573
+ARGP4
+ADDRGP4 $755
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 732
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 1912
+;1911:
+;1912:	VectorClear (self->s.angles);
+ADDRLP4 0
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+CNSTF4 0
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 124
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 120
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+ADDRLP4 0
+INDIRP4
+CNSTI4 116
+ADDP4
+ADDRLP4 4
+INDIRF4
+ASGNF4
+line 1916
+;1913:
+;1914:	
+;1915:	// guess what, it does big damage when nothing set
+;1916:	if (!self->damage) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $756
+line 1917
+;1917:		self->damage = 50;
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+CNSTI4 50
+ASGNI4
+line 1918
+;1918:	}
+LABELV $756
+line 1921
+;1919:
+;1920:	// backup speed, since the train should not move when the round didn't start
+;1921:	self->count = self->speed;
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 760
+ADDP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CVFI4 4
+ASGNI4
+line 1923
+;1922:	// backup health
+;1923:	self->splashDamage  = self->health;
+ADDRLP4 12
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 744
+ADDP4
+ADDRLP4 12
+INDIRP4
+CNSTI4 732
+ADDP4
+INDIRI4
+ASGNI4
+line 1925
+;1924: 
+;1925:	if ( !self->target ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $758
+line 1926
+;1926:		G_Printf ("func_ammo_train without a target at %s\n", vtos(self->r.absmin));
+ADDRFP4 0
+INDIRP4
+CNSTI4 464
+ADDP4
+ARGP4
+ADDRLP4 16
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $760
+ARGP4
+ADDRLP4 16
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 1927
+;1927:		G_FreeEntity( self );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_FreeEntity
+CALLV
+pop
+line 1928
+;1928:		return;
+ADDRGP4 $754
+JUMPV
+LABELV $758
+line 1931
+;1929:	}
+;1930:
+;1931:	trap_SetBrushModel( self, self->model );
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 16
+INDIRP4
+ARGP4
+ADDRLP4 16
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 1932
+;1932:	InitMover( self );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 InitMover
+CALLV
+pop
+line 1935
+;1933: 
+;1934:	
+;1935:	self->takedamage = qtrue;
+ADDRFP4 0
+INDIRP4
+CNSTI4 736
+ADDP4
+CNSTI4 1
+ASGNI4
+line 1937
+;1936:
+;1937:	self->reached = Reached_Train;
+ADDRFP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+ADDRGP4 Reached_Train
+ASGNP4
+line 1941
+;1938:
+;1939:	// start trains on the second frame, to make sure their targets have had
+;1940:	// a chance to spawn
+;1941:	self->nextthink = level.time + FRAMETIME;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 100
+ADDI4
+ASGNI4
+line 1942
+;1942:	self->think = Think_SetupTrainTargets;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_SetupTrainTargets
+ASGNP4
+line 1943
+;1943:	self->die = AmmoTrain_Die;
+ADDRFP4 0
+INDIRP4
+CNSTI4 716
+ADDP4
+ADDRGP4 AmmoTrain_Die
+ASGNP4
+line 1944
+;1944:}
+LABELV $754
+endproc SP_func_ammo_train 20 12
+export Reached_Elevator
+proc Reached_Elevator 32 12
+line 1961
+;1945:
+;1946:/*QUAKED func_elevator (0 .5 .8)
+;1947:The elevator! It only moves along the z-axxis!
+;1948:
+;1949:"model2"	   .md3 model to also draw
+;1950:"speed"		    default 100
+;1951:"dmg"		      default	999
+;1952:"targetname"  the targetname of the elevator (for triggers)
+;1953:"target"      points to path_elevators
+;1954:*/
+;1955:
+;1956:/*
+;1957:===============
+;1958:Reached_Elevator
+;1959:===============
+;1960:*/
+;1961:void Reached_Elevator( gentity_t *ent ) {
+line 1965
+;1962:	gentity_t *t;
+;1963:	
+;1964:	// stop the looping sound
+;1965:	ent->s.loopSound = 0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 156
+ADDP4
+CNSTI4 0
+ASGNI4
+line 1967
+;1966:
+;1967:	if ( ent->moverState == MOVER_1TO2) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 2
+NEI4 $763
+line 1970
+;1968:
+;1969:		// play sound
+;1970:		if ( ent->soundPos2 )	G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos2 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 592
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $765
+ADDRLP4 4
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 4
+INDIRP4
+CNSTI4 592
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $765
+line 1973
+;1971:
+;1972:		// fire targets
+;1973:		if ( !ent->activator ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $767
+line 1974
+;1974:			ent->activator = ent;
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 772
+ADDP4
+ADDRLP4 8
+INDIRP4
+ASGNP4
+line 1975
+;1975:		}
+LABELV $767
+line 1977
+;1976:		
+;1977:		VectorCopy(ent->pos2, ent->pos1);
+ADDRLP4 8
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 8
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 1979
+;1978:
+;1979:		t = NULL;
+ADDRLP4 0
+CNSTP4 0
+ASGNP4
+ADDRGP4 $770
+JUMPV
+LABELV $769
+line 1981
+;1980:		// look through all func_doors
+;1981:		while ( (t = G_Find(t, FOFS(targetname), ent->target)) != NULL ) {
+line 1984
+;1982:			// if we find it, check if it's the correct door (depends on level)
+;1983:			// and if it's able to use, use it!
+;1984:			if ( (ent->elevator_index == t->elevator_index) &&
+ADDRLP4 12
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 12
+INDIRI4
+ADDP4
+INDIRI4
+ADDRLP4 0
+INDIRP4
+ADDRLP4 12
+INDIRI4
+ADDP4
+INDIRI4
+NEI4 $772
+ADDRLP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $318
+ARGP4
+ADDRLP4 20
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 20
+INDIRI4
+CNSTI4 0
+NEI4 $772
+line 1985
+;1985:			     (!strcmp(t->classname, "func_door") ) ) {
+line 1986
+;1986:				if (t->use) t->use(t, ent, ent->activator);
+ADDRLP4 0
+INDIRP4
+CNSTI4 708
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $774
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 28
+INDIRP4
+ARGP4
+ADDRLP4 28
+INDIRP4
+CNSTI4 772
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 708
+ADDP4
+INDIRP4
+CALLV
+pop
+LABELV $774
+line 1987
+;1987:			}
+LABELV $772
+line 1988
+;1988:		}
+LABELV $770
+line 1981
+ADDRLP4 0
+INDIRP4
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 12
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 12
+INDIRP4
+ASGNP4
+ADDRLP4 12
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $769
+line 1991
+;1989:
+;1990:		// reached pos2
+;1991:		SetMoverState( ent, MOVER_POS1, level.time + 50 );
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 0
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 1992
+;1992:	}
+LABELV $763
+line 1993
+;1993:}
+LABELV $762
+endproc Reached_Elevator 32 12
+export Use_Elevator
+proc Use_Elevator 88 12
+line 1995
+;1994:
+;1995:void Use_Elevator( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
+line 2002
+;1996:	gentity_t *t;
+;1997:	gentity_t *s;
+;1998:	float			speed;
+;1999:	vec3_t			move;
+;2000:	float			length;
+;2001:
+;2002:	if (!other) return;
+ADDRFP4 4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $778
+ADDRGP4 $777
+JUMPV
+LABELV $778
+line 2004
+;2003:
+;2004:	ent->activator = activator;
+ADDRFP4 0
+INDIRP4
+CNSTI4 772
+ADDP4
+ADDRFP4 8
+INDIRP4
+ASGNP4
+line 2006
+;2005:
+;2006:	if ( (ent->moverState == MOVER_POS1 ||
+ADDRLP4 28
+ADDRFP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+ASGNI4
+ADDRLP4 28
+INDIRI4
+CNSTI4 0
+EQI4 $782
+ADDRLP4 28
+INDIRI4
+CNSTI4 1
+NEI4 $780
+LABELV $782
+line 2007
+;2007:	     ent->moverState == MOVER_POS2) ) {
+line 2010
+;2008:		// loop through the targets and look for the correct
+;2009:		// path_elevator
+;2010:		t = NULL;
+ADDRLP4 4
+CNSTP4 0
+ASGNP4
+ADDRGP4 $784
+JUMPV
+LABELV $783
+line 2011
+;2011:		while ( (t = G_Find(t, FOFS(targetname), ent->target)) != NULL ) {
+line 2012
+;2012:			if ( (other->elevator_index == t->elevator_index) &&
+ADDRLP4 32
+CNSTI4 1100
+ASGNI4
+ADDRFP4 4
+INDIRP4
+ADDRLP4 32
+INDIRI4
+ADDP4
+INDIRI4
+ADDRLP4 4
+INDIRP4
+ADDRLP4 32
+INDIRI4
+ADDP4
+INDIRI4
+NEI4 $786
+ADDRLP4 4
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $788
+ARGP4
+ADDRLP4 40
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 40
+INDIRI4
+CNSTI4 0
+NEI4 $786
+line 2013
+;2013:			     (!strcmp(t->classname, "path_elevator")) ) break;
+ADDRGP4 $785
+JUMPV
+LABELV $786
+line 2014
+;2014:		}
+LABELV $784
+line 2011
+ADDRLP4 4
+INDIRP4
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 32
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 4
+ADDRLP4 32
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $783
+LABELV $785
+line 2016
+;2015:
+;2016:		if (t == NULL) {
+ADDRLP4 4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $789
+line 2017
+;2017:			G_Printf("Use_Elevator with an unfound target!\n");
+ADDRGP4 $791
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 2018
+;2018:			return;
+ADDRGP4 $777
+JUMPV
+LABELV $789
+line 2022
+;2019:		}
+;2020:
+;2021:		// always trigger the door on same level (open / close door)
+;2022:		if (ent->elevator_index == other->elevator_index) {
+ADDRLP4 36
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 36
+INDIRI4
+ADDP4
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDRLP4 36
+INDIRI4
+ADDP4
+INDIRI4
+NEI4 $792
+line 2023
+;2023:			s = NULL;
+ADDRLP4 0
+CNSTP4 0
+ASGNP4
+ADDRGP4 $795
+JUMPV
+LABELV $794
+line 2024
+;2024:			while ( (s = G_Find(s, FOFS(targetname), ent->target)) != NULL ) {
+line 2025
+;2025:				if ( (ent->elevator_index == s->elevator_index) &&
+ADDRLP4 40
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 40
+INDIRI4
+ADDP4
+INDIRI4
+ADDRLP4 0
+INDIRP4
+ADDRLP4 40
+INDIRI4
+ADDP4
+INDIRI4
+NEI4 $797
+ADDRLP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $318
+ARGP4
+ADDRLP4 48
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 48
+INDIRI4
+CNSTI4 0
+NEI4 $797
+line 2026
+;2026:				     (!strcmp(s->classname, "func_door")) ) {
+line 2028
+;2027:					// we found a door to close
+;2028:					Use_BinaryMover(s, ent, activator);
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 2029
+;2029:				}
+LABELV $797
+line 2030
+;2030:			}
+LABELV $795
+line 2024
+ADDRLP4 0
+INDIRP4
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 40
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 40
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $794
+line 2031
+;2031:		} else {
+ADDRGP4 $793
+JUMPV
+LABELV $792
+line 2034
+;2032:			// only trigger door if it's open if we call the elevator from another
+;2033:			// level
+;2034:			s = NULL;
+ADDRLP4 0
+CNSTP4 0
+ASGNP4
+ADDRGP4 $800
+JUMPV
+LABELV $799
+line 2035
+;2035:			while ( (s = G_Find(s, FOFS(targetname), ent->target)) != NULL ) {
+line 2036
+;2036:				if ( (ent->elevator_index == s->elevator_index) &&
+ADDRLP4 40
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 40
+INDIRI4
+ADDP4
+INDIRI4
+ADDRLP4 0
+INDIRP4
+ADDRLP4 40
+INDIRI4
+ADDP4
+INDIRI4
+NEI4 $802
+ADDRLP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $318
+ARGP4
+ADDRLP4 48
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 48
+INDIRI4
+CNSTI4 0
+NEI4 $802
+ADDRLP4 0
+INDIRP4
+CNSTI4 576
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $802
+line 2038
+;2037:				     (!strcmp(s->classname, "func_door")) &&
+;2038:						 (s->moverState == MOVER_POS2)) {
+line 2040
+;2039:					// we found a door to close
+;2040:					Use_BinaryMover(s, ent, activator);
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRFP4 8
+INDIRP4
+ARGP4
+ADDRGP4 Use_BinaryMover
+CALLV
+pop
+line 2041
+;2041:				}
+LABELV $802
+line 2042
+;2042:			}
+LABELV $800
+line 2035
+ADDRLP4 0
+INDIRP4
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 40
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 40
+INDIRP4
+ASGNP4
+ADDRLP4 40
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $799
+line 2043
+;2043:		}
+LABELV $793
+line 2046
+;2044:
+;2045:		// only perform the move operation, if we are moving to a different level
+;2046:		if (ent->elevator_index != other->elevator_index) {
+ADDRLP4 40
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 40
+INDIRI4
+ADDP4
+INDIRI4
+ADDRFP4 4
+INDIRP4
+ADDRLP4 40
+INDIRI4
+ADDP4
+INDIRI4
+EQI4 $804
+line 2048
+;2047:			// save the index of the level we are going to
+;2048:			ent->elevator_index = t->elevator_index;
+ADDRLP4 44
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 44
+INDIRI4
+ADDP4
+ADDRLP4 4
+INDIRP4
+ADDRLP4 44
+INDIRI4
+ADDP4
+INDIRI4
+ASGNI4
+line 2050
+;2049:
+;2050:			if ( ent->sound1to2 ) G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2);
+ADDRFP4 0
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $806
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 48
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 48
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $806
+line 2052
+;2051:		
+;2052:			VectorCopy(ent->pos2, ent->pos1);
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 52
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 52
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 2053
+;2053:			VectorCopy(t->s.origin, ent->pos2);
+ADDRFP4 0
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 4
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 2056
+;2054:
+;2055:			// if the path_corner has a speed, use that
+;2056:			if ( t->speed ) {
+ADDRLP4 4
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+EQF4 $808
+line 2057
+;2057:				speed = t->speed;
+ADDRLP4 20
+ADDRLP4 4
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 2058
+;2058:			} else {
+ADDRGP4 $809
+JUMPV
+LABELV $808
+line 2060
+;2059:				// otherwise use the train's speed
+;2060:				speed = ent->speed;
+ADDRLP4 20
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 2061
+;2061:			}
+LABELV $809
+line 2062
+;2062:			if ( speed < 1 ) {
+ADDRLP4 20
+INDIRF4
+CNSTF4 1065353216
+GEF4 $810
+line 2063
+;2063:				speed = 1;
+ADDRLP4 20
+CNSTF4 1065353216
+ASGNF4
+line 2064
+;2064:			}
+LABELV $810
+line 2067
+;2065:
+;2066:			// calculate duration
+;2067:			VectorSubtract( ent->pos2, ent->pos1, move );
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8
+ADDRLP4 56
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 56
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 8+4
+ADDRLP4 56
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 56
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 8+8
+ADDRLP4 60
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 2068
+;2068:			length = VectorLength( move );
+ADDRLP4 8
+ARGP4
+ADDRLP4 64
+ADDRGP4 VectorLength
+CALLF4
+ASGNF4
+ADDRLP4 24
+ADDRLP4 64
+INDIRF4
+ASGNF4
+line 2069
+;2069:			VectorScale( move, ent->speed, ent->s.pos.trDelta );
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 8
+INDIRF4
+ADDRLP4 68
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 72
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 8+4
+INDIRF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 76
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 76
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 8+8
+INDIRF4
+ADDRLP4 76
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+line 2070
+;2070:			ent->s.pos.trDuration = length * 1000 / ent->speed;
+ADDRLP4 80
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 80
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDRLP4 80
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 2071
+;2071:			if ( ent->s.pos.trDuration <= 0 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CNSTI4 0
+GTI4 $816
+line 2072
+;2072:				ent->s.pos.trDuration = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTI4 1
+ASGNI4
+line 2073
+;2073:			}
+LABELV $816
+line 2075
+;2074:  
+;2075:			ent->s.pos.trDuration = length * 1000 / speed;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 24
+INDIRF4
+MULF4
+ADDRLP4 20
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 2078
+;2076:	 
+;2077:			// looping sound
+;2078:			ent->s.loopSound = ent->soundLoop;
+ADDRLP4 84
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 84
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 84
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 2080
+;2079:	
+;2080:			SetMoverState( ent, MOVER_1TO2, level.time + 50);
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 2
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 2081
+;2081:		}
+LABELV $804
+line 2082
+;2082:	}
+LABELV $780
+line 2086
+;2083:
+;2084:
+;2085:
+;2086:}
+LABELV $777
+endproc Use_Elevator 88 12
+export Think_Elevator
+proc Think_Elevator 0 0
+line 2088
+;2087:
+;2088:void Think_Elevator( gentity_t *ent ) {
+line 2091
+;2089:	
+;2090:
+;2091:}
+LABELV $819
+endproc Think_Elevator 0 0
+export SP_func_elevator
+proc SP_func_elevator 140 12
+line 2093
+;2092:
+;2093:void SP_func_elevator (gentity_t *ent) {
+line 2100
+;2094:	qboolean lightSet, colorSet;
+;2095:	float light;
+;2096:	float distance;
+;2097:	vec3_t color;
+;2098:	vec3_t move;
+;2099:
+;2100:	G_SpawnInt("elevator_index", "0", &ent->elevator_index);
+ADDRGP4 $549
+ARGP4
+ADDRGP4 $548
+ARGP4
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+ARGP4
+ADDRGP4 G_SpawnInt
+CALLI4
+pop
+line 2102
+;2101:	
+;2102:	if (!ent->speed) ent->speed = 100;
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+NEF4 $821
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+CNSTF4 1120403456
+ASGNF4
+LABELV $821
+line 2103
+;2103:	if (!ent->damage) ent->damage = 25;
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $823
+ADDRFP4 0
+INDIRP4
+CNSTI4 740
+ADDP4
+CNSTI4 25
+ASGNI4
+LABELV $823
+line 2105
+;2104:	// ent->sound1to2 = ent->sound2to1 = G_SoundIndex("sound/movers/doors/elevmove.wav");
+;2105:	ent->soundLoop = G_SoundIndex("sound/movers/doors/elevmove.wav");
+ADDRGP4 $825
+ARGP4
+ADDRLP4 40
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 596
+ADDP4
+ADDRLP4 40
+INDIRI4
+ASGNI4
+line 2106
+;2106:	ent->soundPos1 = ent->soundPos2 = G_SoundIndex("sound/movers/doors/elevding.wav");
+ADDRGP4 $826
+ARGP4
+ADDRLP4 44
+ADDRGP4 G_SoundIndex
+CALLI4
+ASGNI4
+ADDRLP4 48
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 48
+INDIRP4
+CNSTI4 592
+ADDP4
+ADDRLP4 44
+INDIRI4
+ASGNI4
+ADDRLP4 48
+INDIRP4
+CNSTI4 580
+ADDP4
+ADDRLP4 44
+INDIRI4
+ASGNI4
+line 2108
+;2107:
+;2108:	trap_SetBrushModel(ent, ent->model );
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 52
+INDIRP4
+ARGP4
+ADDRLP4 52
+INDIRP4
+CNSTI4 540
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 trap_SetBrushModel
+CALLV
+pop
+line 2110
+;2109:
+;2110:	ent->nextthink = level.time + FRAMETIME;
+ADDRFP4 0
+INDIRP4
+CNSTI4 688
+ADDP4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 100
+ADDI4
+ASGNI4
+line 2111
+;2111:	ent->think = Think_Elevator;
+ADDRFP4 0
+INDIRP4
+CNSTI4 692
+ADDP4
+ADDRGP4 Think_Elevator
+ASGNP4
+line 2113
+;2112:
+;2113:	VectorCopy( ent->s.origin, ent->pos1 );
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 2114
+;2114:	VectorCopy( ent->pos1, ent->pos2);
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 2116
+;2115:
+;2116:	VectorClear(ent->movedir);
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+CNSTF4 0
+ASGNF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 684
+ADDP4
+ADDRLP4 68
+INDIRF4
+ASGNF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 680
+ADDP4
+ADDRLP4 68
+INDIRF4
+ASGNF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 676
+ADDP4
+ADDRLP4 68
+INDIRF4
+ASGNF4
+line 2117
+;2117:	VectorClear(ent->s.angles2);
+ADDRLP4 72
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 76
+CNSTF4 0
+ASGNF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 136
+ADDP4
+ADDRLP4 76
+INDIRF4
+ASGNF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 132
+ADDP4
+ADDRLP4 76
+INDIRF4
+ASGNF4
+ADDRLP4 72
+INDIRP4
+CNSTI4 128
+ADDP4
+ADDRLP4 76
+INDIRF4
+ASGNF4
+line 2118
+;2118:	ent->movedir[2] = 1.0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 684
+ADDP4
+CNSTF4 1065353216
+ASGNF4
+line 2120
+;2119:
+;2120:	if ( ent->model2) ent->s.modelindex2 = G_ModelIndex( ent->model2 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 544
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+EQU4 $828
+ADDRLP4 80
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 80
+INDIRP4
+CNSTI4 544
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 84
+ADDRGP4 G_ModelIndex
+CALLI4
+ASGNI4
+ADDRLP4 80
+INDIRP4
+CNSTI4 164
+ADDP4
+ADDRLP4 84
+INDIRI4
+ASGNI4
+LABELV $828
+line 2122
+;2121:	
+;2122:	lightSet  = G_SpawnFloat( "light", "100", &light);
+ADDRGP4 $435
+ARGP4
+ADDRGP4 $434
+ARGP4
+ADDRLP4 36
+ARGP4
+ADDRLP4 88
+ADDRGP4 G_SpawnFloat
+CALLI4
+ASGNI4
+ADDRLP4 24
+ADDRLP4 88
+INDIRI4
+ASGNI4
+line 2123
+;2123:	colorSet = G_SpawnVector( "color", "1 1 1", color);
+ADDRGP4 $436
+ARGP4
+ADDRGP4 $437
+ARGP4
+ADDRLP4 12
+ARGP4
+ADDRLP4 92
+ADDRGP4 G_SpawnVector
+CALLI4
+ASGNI4
+ADDRLP4 28
+ADDRLP4 92
+INDIRI4
+ASGNI4
+line 2124
+;2124:	if ( lightSet || colorSet ) {
+ADDRLP4 96
+CNSTI4 0
+ASGNI4
+ADDRLP4 24
+INDIRI4
+ADDRLP4 96
+INDIRI4
+NEI4 $832
+ADDRLP4 28
+INDIRI4
+ADDRLP4 96
+INDIRI4
+EQI4 $830
+LABELV $832
+line 2127
+;2125:		int		r, g, b, i;
+;2126:
+;2127:		r = color[0] * 255;
+ADDRLP4 100
+CNSTF4 1132396544
+ADDRLP4 12
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 2128
+;2128:		if ( r > 255 ) {
+ADDRLP4 100
+INDIRI4
+CNSTI4 255
+LEI4 $833
+line 2129
+;2129:			r = 255;
+ADDRLP4 100
+CNSTI4 255
+ASGNI4
+line 2130
+;2130:		}
+LABELV $833
+line 2131
+;2131:		g = color[1] * 255;
+ADDRLP4 104
+CNSTF4 1132396544
+ADDRLP4 12+4
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 2132
+;2132:		if ( g > 255 ) {
+ADDRLP4 104
+INDIRI4
+CNSTI4 255
+LEI4 $836
+line 2133
+;2133:			g = 255;
+ADDRLP4 104
+CNSTI4 255
+ASGNI4
+line 2134
+;2134:		}
+LABELV $836
+line 2135
+;2135:		b = color[2] * 255;
+ADDRLP4 108
+CNSTF4 1132396544
+ADDRLP4 12+8
+INDIRF4
+MULF4
+CVFI4 4
+ASGNI4
+line 2136
+;2136:		if ( b > 255 ) {
+ADDRLP4 108
+INDIRI4
+CNSTI4 255
+LEI4 $839
+line 2137
+;2137:			b = 255;
+ADDRLP4 108
+CNSTI4 255
+ASGNI4
+line 2138
+;2138:		}
+LABELV $839
+line 2139
+;2139:		i = light / 4;
+ADDRLP4 112
+ADDRLP4 36
+INDIRF4
+CNSTF4 1082130432
+DIVF4
+CVFI4 4
+ASGNI4
+line 2140
+;2140:		if ( i > 255 ) {
+ADDRLP4 112
+INDIRI4
+CNSTI4 255
+LEI4 $841
+line 2141
+;2141:			i = 255;
+ADDRLP4 112
+CNSTI4 255
+ASGNI4
+line 2142
+;2142:		}
+LABELV $841
+line 2143
+;2143:		ent->s.constantLight = r | ( g << 8 ) | ( b << 16 ) | ( i << 24 );
+ADDRFP4 0
+INDIRP4
+CNSTI4 152
+ADDP4
+ADDRLP4 100
+INDIRI4
+ADDRLP4 104
+INDIRI4
+CNSTI4 8
+LSHI4
+BORI4
+ADDRLP4 108
+INDIRI4
+CNSTI4 16
+LSHI4
+BORI4
+ADDRLP4 112
+INDIRI4
+CNSTI4 24
+LSHI4
+BORI4
+ASGNI4
+line 2144
+;2144:	}
+LABELV $830
+line 2146
+;2145:	
+;2146:	ent->use = Use_Elevator;
+ADDRFP4 0
+INDIRP4
+CNSTI4 708
+ADDP4
+ADDRGP4 Use_Elevator
+ASGNP4
+line 2147
+;2147:	ent->reached = Reached_Elevator;
+ADDRFP4 0
+INDIRP4
+CNSTI4 696
+ADDP4
+ADDRGP4 Reached_Elevator
+ASGNP4
+line 2149
+;2148:	
+;2149:	SetMoverState( ent, MOVER_POS1, level.time + 50);
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 0
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 2150
+;2150:	ent->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+ADDRFP4 0
+INDIRP4
+CNSTI4 424
+ADDP4
+CNSTI4 128
+ASGNI4
+line 2151
+;2151:	ent->s.eType = ET_MOVER;
+ADDRLP4 100
+CNSTI4 4
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 100
+INDIRI4
+ADDP4
+ADDRLP4 100
+INDIRI4
+ASGNI4
+line 2153
+;2152:	
+;2153:	VectorCopy ( ent->pos1, ent->r.currentOrigin );
+ADDRLP4 104
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 104
+INDIRP4
+CNSTI4 488
+ADDP4
+ADDRLP4 104
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 2154
+;2154:	trap_LinkEntity(ent);
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 trap_LinkEntity
+CALLV
+pop
+line 2156
+;2155:
+;2156:	ent->s.pos.trType = TR_STATIONARY;
+ADDRFP4 0
+INDIRP4
+CNSTI4 12
+ADDP4
+CNSTI4 0
+ASGNI4
+line 2157
+;2157:	VectorCopy( ent->pos1, ent->s.pos.trBase );
+ADDRLP4 108
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 108
+INDIRP4
+CNSTI4 24
+ADDP4
+ADDRLP4 108
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRB
+ASGNB 12
+line 2160
+;2158:	
+;2159:	// calculate time to reach second position from speed
+;2160:	VectorSubtract( ent->pos2, ent->pos1, move );
+ADDRLP4 112
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 112
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 112
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 0+4
+ADDRLP4 112
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 112
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 116
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 0+8
+ADDRLP4 116
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 116
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 2161
+;2161:	distance = VectorLength( move );
+ADDRLP4 0
+ARGP4
+ADDRLP4 120
+ADDRGP4 VectorLength
+CALLF4
+ASGNF4
+ADDRLP4 32
+ADDRLP4 120
+INDIRF4
+ASGNF4
+line 2162
+;2162:	VectorScale( move, ent->speed, ent->s.pos.trDelta );
+ADDRLP4 124
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 124
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 0
+INDIRF4
+ADDRLP4 124
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 128
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 128
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 0+4
+INDIRF4
+ADDRLP4 128
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 132
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 132
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 0+8
+INDIRF4
+ADDRLP4 132
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+line 2163
+;2163:	ent->s.pos.trDuration = distance * 1000 / ent->speed;
+ADDRLP4 136
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 136
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 32
+INDIRF4
+MULF4
+ADDRLP4 136
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 2164
+;2164:	if ( ent->s.pos.trDuration <= 0 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CNSTI4 0
+GTI4 $848
+line 2165
+;2165:		ent->s.pos.trDuration = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTI4 1
+ASGNI4
+line 2166
+;2166:	}
+LABELV $848
+line 2168
+;2167:
+;2168:}
+LABELV $820
+endproc SP_func_elevator 140 12
+export SP_path_elevator
+proc SP_path_elevator 4 8
+line 2175
+;2169:
+;2170:/*QUAKED path_elevator (.5 .3 0) (-8 -8 -8) (8 8 8) LEV0 LEV1 LEV2 LEV3
+;2171:Elevator level path.
+;2172:"targetname" the elevator
+;2173:"speed" speed to move to the next elevator level
+;2174:*/
+;2175:void SP_path_elevator( gentity_t *self ) { 
+line 2176
+;2176:	if ( !self->targetname ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 652
+ADDP4
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $851
+line 2177
+;2177:		G_Printf ("path_corner with no targetname at %s\n", vtos(self->s.origin));
+ADDRFP4 0
+INDIRP4
+CNSTI4 92
+ADDP4
+ARGP4
+ADDRLP4 0
+ADDRGP4 vtos
+CALLP4
+ASGNP4
+ADDRGP4 $718
+ARGP4
+ADDRLP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 2178
+;2178:		G_FreeEntity( self );
+ADDRFP4 0
+INDIRP4
+ARGP4
+ADDRGP4 G_FreeEntity
+CALLV
+pop
+line 2179
+;2179:		return;
+ADDRGP4 $850
+JUMPV
+LABELV $851
+line 2182
+;2180:	}
+;2181:
+;2182:	if (self->spawnflags == 1) self->elevator_index = 0;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 1
+NEI4 $853
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 0
+ASGNI4
+LABELV $853
+line 2183
+;2183:	if (self->spawnflags == 2) self->elevator_index = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 2
+NEI4 $855
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 1
+ASGNI4
+LABELV $855
+line 2184
+;2184:	if (self->spawnflags == 4) self->elevator_index = 2;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 4
+NEI4 $857
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 2
+ASGNI4
+LABELV $857
+line 2185
+;2185:	if (self->spawnflags == 8) self->elevator_index = 3;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 8
+NEI4 $859
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 3
+ASGNI4
+LABELV $859
+line 2186
+;2186:	if (self->spawnflags == 16) self->elevator_index = 4;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 16
+NEI4 $861
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 4
+ASGNI4
+LABELV $861
+line 2187
+;2187:	if (self->spawnflags == 32) self->elevator_index = 5;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 32
+NEI4 $863
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 5
+ASGNI4
+LABELV $863
+line 2188
+;2188:	if (self->spawnflags == 64) self->elevator_index = 6;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 64
+NEI4 $865
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 6
+ASGNI4
+LABELV $865
+line 2189
+;2189:	if (self->spawnflags == 128) self->elevator_index = 7;
+ADDRFP4 0
+INDIRP4
+CNSTI4 528
+ADDP4
+INDIRI4
+CNSTI4 128
+NEI4 $867
+ADDRFP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+CNSTI4 7
+ASGNI4
+LABELV $867
+line 2190
+;2190:}
+LABELV $850
+endproc SP_path_elevator 4 8
+export ElevatorReset
+proc ElevatorReset 72 12
+line 2193
+;2191:
+;2192:
+;2193:void ElevatorReset( gentity_t *ent ) {
+line 2201
+;2194:	gentity_t *t;
+;2195:	float			speed;
+;2196:	vec3_t			move;
+;2197:	float			length;
+;2198:	
+;2199:	// loop through the targets and look for the correct
+;2200:	// path_elevator
+;2201:	t = NULL;
+ADDRLP4 0
+CNSTP4 0
+ASGNP4
+ADDRGP4 $871
+JUMPV
+LABELV $870
+line 2202
+;2202:	while ( (t = G_Find(t, FOFS(targetname), ent->target)) != NULL ) {
+line 2203
+;2203:		if ( (0 == t->elevator_index) &&
+ADDRLP4 0
+INDIRP4
+CNSTI4 1100
+ADDP4
+INDIRI4
+CNSTI4 0
+NEI4 $873
+ADDRLP4 0
+INDIRP4
+CNSTI4 524
+ADDP4
+INDIRP4
+ARGP4
+ADDRGP4 $788
+ARGP4
+ADDRLP4 28
+ADDRGP4 strcmp
+CALLI4
+ASGNI4
+ADDRLP4 28
+INDIRI4
+CNSTI4 0
+NEI4 $873
+line 2204
+;2204:		     (!strcmp(t->classname, "path_elevator")) ) break;
+ADDRGP4 $872
+JUMPV
+LABELV $873
+line 2205
+;2205:	}
+LABELV $871
+line 2202
+ADDRLP4 0
+INDIRP4
+ARGP4
+CNSTI4 652
+ARGI4
+ADDRFP4 0
+INDIRP4
+CNSTI4 648
+ADDP4
+INDIRP4
+ARGP4
+ADDRLP4 24
+ADDRGP4 G_Find
+CALLP4
+ASGNP4
+ADDRLP4 0
+ADDRLP4 24
+INDIRP4
+ASGNP4
+ADDRLP4 24
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $870
+LABELV $872
+line 2207
+;2206:
+;2207:	if (t == NULL) {
+ADDRLP4 0
+INDIRP4
+CVPU4 4
+CNSTU4 0
+NEU4 $875
+line 2208
+;2208:		G_Printf("Use_Elevator with an unfound target!\n");
+ADDRGP4 $791
+ARGP4
+ADDRGP4 G_Printf
+CALLV
+pop
+line 2209
+;2209:		return;
+ADDRGP4 $869
+JUMPV
+LABELV $875
+line 2213
+;2210:	}
+;2211:
+;2212:	// save the index of the level we are going to
+;2213:	ent->elevator_index = t->elevator_index;
+ADDRLP4 28
+CNSTI4 1100
+ASGNI4
+ADDRFP4 0
+INDIRP4
+ADDRLP4 28
+INDIRI4
+ADDP4
+ADDRLP4 0
+INDIRP4
+ADDRLP4 28
+INDIRI4
+ADDP4
+INDIRI4
+ASGNI4
+line 2215
+;2214:
+;2215:	if ( ent->sound1to2 ) G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2);
+ADDRFP4 0
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+CNSTI4 0
+EQI4 $877
+ADDRLP4 32
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 32
+INDIRP4
+ARGP4
+CNSTI4 52
+ARGI4
+ADDRLP4 32
+INDIRP4
+CNSTI4 584
+ADDP4
+INDIRI4
+ARGI4
+ADDRGP4 G_AddEvent
+CALLV
+pop
+LABELV $877
+line 2217
+;2216:		
+;2217:	VectorCopy(ent->pos2, ent->pos1);
+ADDRLP4 36
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 612
+ADDP4
+ADDRLP4 36
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRB
+ASGNB 12
+line 2218
+;2218:	VectorCopy(t->s.origin, ent->pos2);
+ADDRFP4 0
+INDIRP4
+CNSTI4 624
+ADDP4
+ADDRLP4 0
+INDIRP4
+CNSTI4 92
+ADDP4
+INDIRB
+ASGNB 12
+line 2221
+;2219:
+;2220:	// if the path_corner has a speed, use that
+;2221:	if ( t->speed ) {
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+CNSTF4 0
+EQF4 $879
+line 2222
+;2222:		speed = t->speed;
+ADDRLP4 16
+ADDRLP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 2223
+;2223:	} else {
+ADDRGP4 $880
+JUMPV
+LABELV $879
+line 2225
+;2224:		// otherwise use the train's speed
+;2225:		speed = ent->speed;
+ADDRLP4 16
+ADDRFP4 0
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+ASGNF4
+line 2226
+;2226:	}
+LABELV $880
+line 2227
+;2227:	if ( speed < 1 ) {
+ADDRLP4 16
+INDIRF4
+CNSTF4 1065353216
+GEF4 $881
+line 2228
+;2228:		speed = 1;
+ADDRLP4 16
+CNSTF4 1065353216
+ASGNF4
+line 2229
+;2229:	}
+LABELV $881
+line 2232
+;2230:
+;2231:	// calculate duration
+;2232:	VectorSubtract( ent->pos2, ent->pos1, move );
+ADDRLP4 40
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4
+ADDRLP4 40
+INDIRP4
+CNSTI4 624
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 612
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 4+4
+ADDRLP4 40
+INDIRP4
+CNSTI4 628
+ADDP4
+INDIRF4
+ADDRLP4 40
+INDIRP4
+CNSTI4 616
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+ADDRLP4 44
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 4+8
+ADDRLP4 44
+INDIRP4
+CNSTI4 632
+ADDP4
+INDIRF4
+ADDRLP4 44
+INDIRP4
+CNSTI4 620
+ADDP4
+INDIRF4
+SUBF4
+ASGNF4
+line 2233
+;2233:	length = VectorLength( move );
+ADDRLP4 4
+ARGP4
+ADDRLP4 48
+ADDRGP4 VectorLength
+CALLF4
+ASGNF4
+ADDRLP4 20
+ADDRLP4 48
+INDIRF4
+ASGNF4
+line 2234
+;2234:	VectorScale( move, ent->speed, ent->s.pos.trDelta );
+ADDRLP4 52
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 52
+INDIRP4
+CNSTI4 36
+ADDP4
+ADDRLP4 4
+INDIRF4
+ADDRLP4 52
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 56
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 56
+INDIRP4
+CNSTI4 40
+ADDP4
+ADDRLP4 4+4
+INDIRF4
+ADDRLP4 56
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+ADDRLP4 60
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 60
+INDIRP4
+CNSTI4 44
+ADDP4
+ADDRLP4 4+8
+INDIRF4
+ADDRLP4 60
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+MULF4
+ASGNF4
+line 2235
+;2235:	ent->s.pos.trDuration = length * 1000 / ent->speed;
+ADDRLP4 64
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 64
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 20
+INDIRF4
+MULF4
+ADDRLP4 64
+INDIRP4
+CNSTI4 672
+ADDP4
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 2236
+;2236:	if ( ent->s.pos.trDuration <= 0 ) {
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+INDIRI4
+CNSTI4 0
+GTI4 $887
+line 2237
+;2237:		ent->s.pos.trDuration = 1;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTI4 1
+ASGNI4
+line 2238
+;2238:	}
+LABELV $887
+line 2240
+;2239:  
+;2240:	ent->s.pos.trDuration = length * 1000 / speed;
+ADDRFP4 0
+INDIRP4
+CNSTI4 20
+ADDP4
+CNSTF4 1148846080
+ADDRLP4 20
+INDIRF4
+MULF4
+ADDRLP4 16
+INDIRF4
+DIVF4
+CVFI4 4
+ASGNI4
+line 2243
+;2241: 
+;2242:	// looping sound
+;2243:	ent->s.loopSound = ent->soundLoop;
+ADDRLP4 68
+ADDRFP4 0
+INDIRP4
+ASGNP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 156
+ADDP4
+ADDRLP4 68
+INDIRP4
+CNSTI4 596
+ADDP4
+INDIRI4
+ASGNI4
+line 2245
+;2244:
+;2245:	SetMoverState( ent, MOVER_1TO2, level.time + 50);
+ADDRFP4 0
+INDIRP4
+ARGP4
+CNSTI4 2
+ARGI4
+ADDRGP4 level+32
+INDIRI4
+CNSTI4 50
+ADDI4
+ARGI4
+ADDRGP4 SetMoverState
+CALLV
+pop
+line 2246
+;2246:}
+LABELV $869
+endproc ElevatorReset 72 12
+bss
+export pushed_p
+align 4
+LABELV pushed_p
+skip 4
+export pushed
+align 4
+LABELV pushed
+skip 32768
+import trap_SnapVector
+import trap_GeneticParentsAndChildSelection
+import trap_BotResetWeaponState
+import trap_BotFreeWeaponState
+import trap_BotAllocWeaponState
+import trap_BotLoadWeaponWeights
+import trap_BotGetWeaponInfo
+import trap_BotChooseBestFightWeapon
+import trap_BotAddAvoidSpot
+import trap_BotInitMoveState
+import trap_BotFreeMoveState
+import trap_BotAllocMoveState
+import trap_BotPredictVisiblePosition
+import trap_BotMovementViewTarget
+import trap_BotReachabilityArea
+import trap_BotResetLastAvoidReach
+import trap_BotResetAvoidReach
+import trap_BotMoveInDirection
+import trap_BotMoveToGoal
+import trap_BotResetMoveState
+import trap_BotFreeGoalState
+import trap_BotAllocGoalState
+import trap_BotMutateGoalFuzzyLogic
+import trap_BotSaveGoalFuzzyLogic
+import trap_BotInterbreedGoalFuzzyLogic
+import trap_BotFreeItemWeights
+import trap_BotLoadItemWeights
+import trap_BotUpdateEntityItems
+import trap_BotInitLevelItems
+import trap_BotSetAvoidGoalTime
+import trap_BotAvoidGoalTime
+import trap_BotGetLevelItemGoal
+import trap_BotGetMapLocationGoal
+import trap_BotGetNextCampSpotGoal
+import trap_BotItemGoalInVisButNotVisible
+import trap_BotTouchingGoal
+import trap_BotChooseNBGItem
+import trap_BotChooseLTGItem
+import trap_BotGetSecondGoal
+import trap_BotGetTopGoal
+import trap_BotGoalName
+import trap_BotDumpGoalStack
+import trap_BotDumpAvoidGoals
+import trap_BotEmptyGoalStack
+import trap_BotPopGoal
+import trap_BotPushGoal
+import trap_BotResetAvoidGoals
+import trap_BotRemoveFromAvoidGoals
+import trap_BotResetGoalState
+import trap_BotSetChatName
+import trap_BotSetChatGender
+import trap_BotLoadChatFile
+import trap_BotReplaceSynonyms
+import trap_UnifyWhiteSpaces
+import trap_BotMatchVariable
+import trap_BotFindMatch
+import trap_StringContains
+import trap_BotGetChatMessage
+import trap_BotEnterChat
+import trap_BotChatLength
+import trap_BotReplyChat
+import trap_BotNumInitialChats
+import trap_BotInitialChat
+import trap_BotNumConsoleMessages
+import trap_BotNextConsoleMessage
+import trap_BotRemoveConsoleMessage
+import trap_BotQueueConsoleMessage
+import trap_BotFreeChatState
+import trap_BotAllocChatState
+import trap_Characteristic_String
+import trap_Characteristic_BInteger
+import trap_Characteristic_Integer
+import trap_Characteristic_BFloat
+import trap_Characteristic_Float
+import trap_BotFreeCharacter
+import trap_BotLoadCharacter
+import trap_EA_ResetInput
+import trap_EA_GetInput
+import trap_EA_EndRegular
+import trap_EA_View
+import trap_EA_Move
+import trap_EA_DelayedJump
+import trap_EA_Jump
+import trap_EA_SelectWeapon
+import trap_EA_MoveRight
+import trap_EA_MoveLeft
+import trap_EA_MoveBack
+import trap_EA_MoveForward
+import trap_EA_MoveDown
+import trap_EA_MoveUp
+import trap_EA_Crouch
+import trap_EA_Respawn
+import trap_EA_Use
+import trap_EA_Attack
+import trap_EA_Talk
+import trap_EA_Gesture
+import trap_EA_Action
+import trap_EA_Command
+import trap_EA_SayTeam
+import trap_EA_Say
+import trap_AAS_PredictClientMovement
+import trap_AAS_Swimming
+import trap_AAS_AlternativeRouteGoals
+import trap_AAS_PredictRoute
+import trap_AAS_EnableRoutingArea
+import trap_AAS_AreaTravelTimeToGoalArea
+import trap_AAS_AreaReachability
+import trap_AAS_IntForBSPEpairKey
+import trap_AAS_FloatForBSPEpairKey
+import trap_AAS_VectorForBSPEpairKey
+import trap_AAS_ValueForBSPEpairKey
+import trap_AAS_NextBSPEntity
+import trap_AAS_PointContents
+import trap_AAS_TraceAreas
+import trap_AAS_PointReachabilityAreaIndex
+import trap_AAS_PointAreaNum
+import trap_AAS_Time
+import trap_AAS_PresenceTypeBoundingBox
+import trap_AAS_Initialized
+import trap_AAS_EntityInfo
+import trap_AAS_AreaInfo
+import trap_AAS_BBoxAreas
+import trap_BotUserCommand
+import trap_BotGetServerCommand
+import trap_BotGetSnapshotEntity
+import trap_BotLibTest
+import trap_BotLibUpdateEntity
+import trap_BotLibLoadMap
+import trap_BotLibStartFrame
+import trap_BotLibDefine
+import trap_BotLibVarGet
+import trap_BotLibVarSet
+import trap_BotLibShutdown
+import trap_BotLibSetup
+import trap_DebugPolygonDelete
+import trap_DebugPolygonCreate
+import trap_GetEntityToken
+import trap_GetUsercmd
+import trap_BotFreeClient
+import trap_BotAllocateClient
+import trap_EntityContact
+import trap_EntitiesInBox
+import trap_UnlinkEntity
+import trap_LinkEntity
+import trap_AreasConnected
+import trap_AdjustAreaPortalState
+import trap_InPVSIgnorePortals
+import trap_InPVS
+import trap_PointContents
+import trap_Trace
+import trap_SetBrushModel
+import trap_GetServerinfo
+import trap_SetUserinfo
+import trap_GetUserinfo
+import trap_GetConfigstring
+import trap_SetConfigstring
+import trap_SendServerCommand
+import trap_DropClient
+import trap_LocateGameData
+import trap_Cvar_VariableStringBuffer
+import trap_Cvar_VariableValue
+import trap_Cvar_VariableIntegerValue
+import trap_Cvar_Set
+import trap_Cvar_Update
+import trap_Cvar_Register
+import trap_SendConsoleCommand
+import trap_FS_GetFileList
+import trap_FS_FCloseFile
+import trap_FS_Write
+import trap_FS_Read
+import trap_FS_FOpenFile
+import trap_Args
+import trap_Argv
+import trap_Argc
+import trap_Milliseconds
+import trap_Error
+import trap_Printf
+import LTS_Rounds
+import i_sCountDown
+import b_sWaitingForPlayers
+import i_sNextWaitPrint
+import g_antilag
+import g_squadAssault
+import g_minPlayers
+import g_testSmoke
+import g_teamlockcamera
+import g_shotgunleedvelocity
+import g_leedvelocity
+import g_teamRespawn
+import g_teamXp
+import g_baseXp
+import g_roundTime
+import g_maxTeamKill
+import g_allowKnifes
+import g_logradio
+import g_proxMineTimeout
+import g_singlePlayer
+import g_enableBreath
+import g_enableDust
+import g_rankings
+import pmove_msec
+import pmove_fixed
+import g_smoothClients
+import g_blueteam
+import g_redteam
+import g_cubeTimeout
+import g_obeliskRespawnDelay
+import g_obeliskRegenAmount
+import g_obeliskRegenPeriod
+import g_obeliskHealth
+import g_filterBan
+import g_banIPs
+import g_teamForceBalance
+import g_teamAutoJoin
+import g_allowVote
+import g_blood
+import g_doWarmup
+import g_warmup
+import g_motd
+import g_synchronousClients
+import g_weaponTeamRespawn
+import g_weaponRespawn
+import g_debugDamage
+import g_debugAlloc
+import g_debugMove
+import g_inactivity
+import g_forcerespawn
+import g_knockback
+import g_speed
+import g_gravity
+import g_needpass
+import g_password
+import g_friendlyFire
+import g_capturelimit
+import g_timelimit
+import g_fraglimit
+import g_dmflags
+import g_restarted
+import g_maxGameClients
+import g_maxclients
+import g_cheats
+import g_dedicated
+import g_gametype
+import g_entities
+import level
+import Pickup_Team
+import CheckTeamStatus
+import TeamplayInfoMessage
+import Team_GetLocationMsg
+import Team_GetLocation
+import SelectCTFSpawnPoint
+import Team_FreeEntity
+import Team_ReturnFlag
+import Team_InitGame
+import Team_CheckHurtCarrier
+import Team_FragBonuses
+import Team_DroppedFlagThink
+import AddTeamScore
+import TeamColorString
+import OtherTeamName
+import TeamName
+import OtherTeam
+import BotTestAAS
+import BotAIStartFrame
+import BotAIShutdownClient
+import BotAISetupClient
+import BotAILoadMap
+import BotAIShutdown
+import BotAISetup
+import BotInterbreedEndMatch
+import Svcmd_BotList_f
+import Svcmd_AddBot_f
+import G_BotConnect
+import G_RemoveQueuedBotBegin
+import G_CheckBotSpawn
+import G_GetBotInfoByName
+import G_GetBotInfoByNumber
+import G_InitBots
+import Svcmd_AbortPodium_f
+import SpawnModelsOnVictoryPads
+import UpdateTournamentInfo
+import G_WriteSessionData
+import G_InitWorldSession
+import G_InitSessionData
+import G_ReadSessionData
+import Svcmd_GameMem_f
+import G_InitMemory
+import G_Alloc
+import CheckObeliskAttack
+import Team_CheckDroppedItem
+import OnSameTeam
+import G_RunClient
+import ClientEndFrame
+import ClientThink
+import ClientCommand
+import ClientBegin
+import ClientDisconnect
+import ClientUserinfoChanged
+import ClientConnect
+import G_Error
+import G_Printf
+import SendScoreboardMessageToAllClients
+import G_LogPrintf
+import G_RunThink
+import CheckTeamLeader
+import SetLeader
+import FindIntermissionPoint
+import DeathmatchScoreboardMessage
+import G_SetStats
+import MoveClientToIntermission
+import FireWeapon
+import G_FilterPacket
+import G_ProcessIPBans
+import ConsoleCommand
+import SpotWouldTelefrag
+import CalculateRanks
+import AddScore
+import player_die
+import ClientSpawn
+import InitBodyQue
+import InitClientResp
+import InitClientPersistant
+import BeginIntermission
+import respawn
+import SelectSpawnPoint
+import SetClientViewAngle
+import PickTeam
+import TeamLeader
+import TeamCount
+import Weapon_HookThink
+import CheckMeleeAttack
+import SnapVectorTowards
+import CalcMuzzlePoint
+import LogAccuracyHit
+import TeleportPlayer
+import trigger_teleporter_touch
+import fire_grapple
+import fire_bfg
+import fire_rocket
+import fire_grenade
+import fire_plasma
+import fire_blaster
+import G_RunMissile
+import TossClientCubes
+import TossClientItems
+import body_die
+import G_InvulnerabilityEffect
+import G_RadiusDamage
+import G_Damage
+import CanDamage
+import BuildShaderStateConfig
+import AddRemap
+import G_SetOrigin
+import G_AddEvent
+import G_AddPredictableEvent
+import vectoyaw
+import vtos
+import tv
+import G_TouchSolids
+import G_TouchTriggers
+import G_EntitiesFree
+import G_FreeEntity
+import G_Sound
+import G_TempEntity
+import G_Spawn
+import G_InitGentity
+import G_SetMovedir
+import G_UseTargets
+import G_PickTarget
+import G_Find
+import G_KillBox
+import G_TeamCommand
+import G_SoundIndex
+import G_ModelIndex
+import SaveRegisteredItems
+import RegisterItem
+import ClearRegisteredItems
+import Touch_Item
+import Add_Ammo
+import ArmorIndex
+import Think_Weapon
+import FinishSpawningItem
+import G_SpawnItem
+import SetRespawn
+import LaunchItem
+import Drop_Item
+import PrecacheItem
+import UseHoldableItem
+import RespawnItem
+import G_RunItem
+import G_CheckTeamItems
+import Cmd_FollowCycle_f
+import SetTeam
+import BroadcastTeamChange
+import StopFollowing
+import Cmd_Score_f
+import G_NewString
+import G_SpawnEntitiesFromString
+import G_SpawnVector
+import G_SpawnInt
+import G_SpawnFloat
+import G_SpawnString
+import Team_SetFlagStatus
+import NS_GetTime
+import NS_RestoreHitboxes
+import NS_FixHitboxes
+import NS_SendMessageToTeam
+import NS_InitHeadGear
+import NS_GetMapName
+import NS_ActiveRound
+import NS_RecalcCharacter
+import NS_ValidatePlayerLooks
+import NS_CalculateRadar
+import G_ApplyAntiLag
+import G_UndoAntiLag
+import G_UpdateClientAntiLag
+import NS_FreeXP
+import NS_TeamKill
+import NS_GiveReward
+import NS_SetClientCrosshairState
+import PrintMsgToAllAlive
+import NS_PlayerAnimation
+import CenterPrintAll
+import G_Say
+import PrintMsg
+import BodySink
+import CopyToBodyQue
+import G_ExplodeMissile
+import NS_GetNameForClass
+import Drop_Weapon
+import fire_smoke_grenade
+import NS_FindRadius
+import SelectTeamSpawnPoint
+import NS_HandlePlayerMenu
+import NS_HandleCreateClassMenu
+import NS_HandleEquipmentMenu
+import NS_HandleRadioMenu
+import NS_HandleClassMenu
+import NS_HandleCharacterMenu
+import NS_HandleAmmoMenu
+import NS_HandleMainMenu
+import NS_HandleSecondaryWeaponMenu
+import NS_HandleTeamMenu
+import NS_HandlePrimaryWeaponMenu
+import SetClass
+import NS_OpenPlayerMenu
+import NS_OpenCreateClassMenu
+import NS_OpenEquipmentMenu
+import NS_OpenSpectatorMenu
+import NS_OpenPrimaryWeaponMenu
+import NS_OpenRadioMenu
+import NS_OpenMainMenu
+import NS_OpenClassMenu
+import NS_OpenTeamMenu
+import NS_MenuSelect
+import pointinback
+import is_func_explosive
+import DoorRotating_ResetState
+import TriggerToggle_ResetState
+import Think_Goal
+import Touch_Goal
+import Laser_Gen
+import CheckTeamplay
+import NS_CalcWeight
+import NS_CheckEndRound
+import bomb_explode
+import bomb_drop
+import bomb_explode_instantly
+import bomb_defused
+import bomb_checkremovewire
+import NS_GotEnoughXPfornextLevel
+import NS_BombExistForTeam
+import NS_CalcSpeed
+import AliveTeamCount
+import NS_CalculateStartingXP
+import NS_CalcDamageOnRange
+import NS_BulletHoleTypeForSurface
+import NS_GotWounds
+import BG_GetMaxRoundForWeapon
+import NS_GetRounds
+import NS_CheckLocationDamage
+import BG_MaximumWeaponRange
+import NS_GetAccuracy
+import NS_GetPrevMap
+import NS_GetNextMap
+import NS_InitMapCycle
+import assault_field_stopall
+import NS_ModifyClientBBox
+import NS_InitHeadBBoxes
+import G_SetupServerInfo
+import NS_RaiseCharacterLevel
+import NS_PlayerInventory
+import NS_SpawnFlare
+import Pick_Item
+import NS_KillMenu
+import G_LocalSound
+import NS_DirectMenuSelect
+import NS_AdjustClientVWeap
+import NS_Gesture
+import NS_EndRoundForTeam
+import NS_OpenDoor
+import NS_HolsterWeapon
+import Reset_Briefcase
+import NS_EndRound
+import NS_WeaponMode
+import NS_GiveXP
+import NS_WonRound
+import NS_ClearInventory
+import NS_RemoveItems
+import NS_DropWeapon
+import NS_StartBandage
+import NS_Bandaging
+import NS_NavySeals_ClientInit
+import NS_CauseBleeding
+import NS_SprayBlood
+import Cmd_Reload_f
+import NS_SetSecondary
+import NS_SetPrimary
+import G_RunActor
+import NS_CheckRemoveTeamKill
+import Fire_Lead
+import BG_GotSecondary
+import NS_IsVipAlive
+import NS_CanShotgunBlowHead
+import NS_GotPowerup
+import Is_OnBrushTeam
+import NS_IsBot
+import Is_Spectator
+import PI_CheckWeapon
+import Weapon_C4
+import RadioBroadcast
+import Cmd_Radio_power_f
+import Cmd_Radioteam_f
+import RadioThink
+import PrecacheRadioSounds
+import Pickup_Briefcase
+import NS_Itsame
+import NS_TMequip
+import NS_SetGameState
+import lastvip
+import GameState
+import g_LockXP
+import g_matchLockXP
+import g_mapcycle
+import g_firstCountdown
+import g_TeamKillRemoveTime
+import g_TeamScores
+import g_TeamPlayers
+import g_updateServerInfoTime
+import g_allowTeampointlimitVote
+import g_allowTimelimitVote
+import g_allowKickVote
+import g_allowMapVote
+import g_noGrenades
+import g_noSecondary
+import g_noPrimary
+import g_realLead
+import g_silentBullets
+import g_snipermod
+import g_pistolmod
+import g_riflemod
+import g_bombTime
+import g_invenTime
+import g_aimCorrect
+import g_overrideGoals
+import g_keepCharacter
+import BG_GotWeapon
+import BG_RemoveWeapon
+import BG_ClearWeapons
+import BG_PackWeapon
+import BG_WeaponMods
+import BG_GetSpeedMod
+import BG_CalcSpeed
+import BG_IsInGLMode
+import BG_IsShotgun
+import BG_HasLaser
+import BG_IsZooming
+import BG_IsGrenade
+import BG_IsSMG
+import BG_IsSecondary
+import BG_IsPrimary
+import BG_GotPrimary
+import BG_IsPistol
+import BG_IsMelee
+import BG_IsSmg
+import BG_IsRifle
+import BG_IsSemiAutomatic
+import BG_LeadGetBreakValueForSurface
+import BG_PlayerTouchesItem
+import BG_PlayerStateToEntityStateExtraPolate
+import BG_PlayerStateToEntityState
+import BG_TouchJumpPad
+import BG_AddPredictableEventToPlayerstate
+import BG_EvaluateTrajectoryDelta
+import BG_EvaluateTrajectory
+import BG_CanItemBeGrabbed
+import BG_SurfaceToString
+import BG_FindItemForHoldable
+import BG_FindItemForPowerup
+import BG_FindItemForWeapon
+import BG_FindItem
+import bg_numItems
+import bg_itemlist
+import Pmove
+import PM_UpdateViewAngles
+import colorLtBlue
+import Com_Printf
+import Com_Error
+import Info_NextPair
+import Info_Validate
+import Info_SetValueForKey_Big
+import Info_SetValueForKey
+import Info_RemoveKey_big
+import Info_RemoveKey
+import Info_ValueForKey
+import va
+import Swap_Init
+import LittleFloat
+import BigFloat
+import LittleLong64
+import BigLong64
+import LittleLong
+import BigLong
+import LittleShort
+import BigShort
+import Q_CleanStr
+import Q_PrintStrlen
+import Q_strcat
+import Q_strncpyz
+import Q_strrchr
+import Q_strupr
+import Q_strlwr
+import Q_stricmpn
+import Q_strncmp
+import Q_stricmp
+import Q_isalpha
+import Q_isupper
+import Q_islower
+import Q_isprint
+import Com_sprintf
+import Parse3DMatrix
+import Parse2DMatrix
+import Parse1DMatrix
+import SkipRestOfLine
+import SkipBracedSection
+import COM_MatchToken
+import COM_ParseWarning
+import COM_ParseError
+import COM_Compress
+import COM_ParseExt
+import COM_Parse
+import COM_GetCurrentParseLine
+import COM_BeginParseSession
+import COM_DefaultExtension
+import COM_StripExtension
+import COM_SkipPath
+import Com_Clamp
+import PerpendicularVector
+import AngleVectors
+import MatrixMultiply
+import MakeNormalVectors
+import RotateAroundDirection
+import RotatePointAroundVector
+import ProjectPointOnPlane
+import PlaneFromPoints
+import AngleDelta
+import AngleNormalize180
+import AngleNormalize360
+import AnglesSubtract
+import AngleSubtract
+import LerpAngle
+import AngleMod
+import BoxOnPlaneSide
+import SetPlaneSignbits
+import AxisCopy
+import AxisClear
+import AnglesToAxis
+import vectoangles
+import Q_crandom
+import Q_random
+import Q_rand
+import Q_acos
+import Q_log2
+import VectorRotate
+import Vector4Scale
+import VectorInverse
+import VectorNormalize2
+import VectorNormalizeFast
+import VectorNormalize
+import CrossProduct
+import DistanceSquared
+import Distance
+import VectorLengthSquared
+import VectorLength
+import VectorCompare
+import AddPointToBounds
+import ClearBounds
+import RadiusFromBounds
+import NormalizeColor
+import ColorBytes4
+import ColorBytes3
+import _VectorMA
+import _VectorScale
+import _VectorCopy
+import _VectorAdd
+import _VectorSubtract
+import _DotProduct
+import ByteToDir
+import DirToByte
+import ClampShort
+import ClampChar
+import Q_rsqrt
+import Q_fabs
+import axisDefault
+import vec3_origin
+import g_color_table
+import colorDkGrey
+import colorMdGrey
+import colorLtGrey
+import colorWhite
+import colorCyan
+import colorMagenta
+import colorYellow
+import colorBlue
+import colorGreen
+import colorRed
+import colorBlack
+import bytedirs
+import Com_Memcpy
+import Com_Memset
+import Hunk_Alloc
+import acos
+import fabs
+import abs
+import tan
+import atan2
+import cos
+import sin
+import sqrt
+import floor
+import ceil
+import memcpy
+import memset
+import memmove
+import sscanf
+import vsprintf
+import _atoi
+import atoi
+import _atof
+import atof
+import toupper
+import tolower
+import strncpy
+import strstr
+import strchr
+import strcmp
+import strcpy
+import strcat
+import strlen
+import rand
+import srand
+import qsort
+lit
+align 1
+LABELV $826
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 101
+byte 1 108
+byte 1 101
+byte 1 118
+byte 1 100
+byte 1 105
+byte 1 110
+byte 1 103
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $825
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 101
+byte 1 108
+byte 1 101
+byte 1 118
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $791
+byte 1 85
+byte 1 115
+byte 1 101
+byte 1 95
+byte 1 69
+byte 1 108
+byte 1 101
+byte 1 118
+byte 1 97
+byte 1 116
+byte 1 111
+byte 1 114
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 32
+byte 1 97
+byte 1 110
+byte 1 32
+byte 1 117
+byte 1 110
+byte 1 102
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 33
+byte 1 10
+byte 1 0
+align 1
+LABELV $788
+byte 1 112
+byte 1 97
+byte 1 116
+byte 1 104
+byte 1 95
+byte 1 101
+byte 1 108
+byte 1 101
+byte 1 118
+byte 1 97
+byte 1 116
+byte 1 111
+byte 1 114
+byte 1 0
+align 1
+LABELV $760
+byte 1 102
+byte 1 117
+byte 1 110
+byte 1 99
+byte 1 95
+byte 1 97
+byte 1 109
+byte 1 109
+byte 1 111
+byte 1 95
+byte 1 116
+byte 1 114
+byte 1 97
+byte 1 105
+byte 1 110
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 111
+byte 1 117
+byte 1 116
+byte 1 32
+byte 1 97
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 32
+byte 1 97
+byte 1 116
+byte 1 32
+byte 1 37
+byte 1 115
+byte 1 10
+byte 1 0
+align 1
+LABELV $755
+byte 1 53
+byte 1 48
+byte 1 48
+byte 1 0
+align 1
+LABELV $753
+byte 1 97
+byte 1 109
+byte 1 109
+byte 1 111
+byte 1 32
+byte 1 116
+byte 1 114
+byte 1 97
+byte 1 105
+byte 1 110
+byte 1 32
+byte 1 105
+byte 1 115
+byte 1 32
+byte 1 100
+byte 1 101
+byte 1 97
+byte 1 100
+byte 1 0
+align 1
+LABELV $748
+byte 1 51
+byte 1 48
+byte 1 0
+align 1
+LABELV $742
+byte 1 112
+byte 1 104
+byte 1 97
+byte 1 115
+byte 1 101
+byte 1 0
+align 1
+LABELV $741
+byte 1 51
+byte 1 50
+byte 1 0
+align 1
+LABELV $728
+byte 1 102
+byte 1 117
+byte 1 110
+byte 1 99
+byte 1 95
+byte 1 116
+byte 1 114
+byte 1 97
+byte 1 105
+byte 1 110
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 111
+byte 1 117
+byte 1 116
+byte 1 32
+byte 1 97
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 32
+byte 1 97
+byte 1 116
+byte 1 32
+byte 1 37
+byte 1 115
+byte 1 10
+byte 1 0
+align 1
+LABELV $718
+byte 1 112
+byte 1 97
+byte 1 116
+byte 1 104
+byte 1 95
+byte 1 99
+byte 1 111
+byte 1 114
+byte 1 110
+byte 1 101
+byte 1 114
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 32
+byte 1 110
+byte 1 111
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 110
+byte 1 97
+byte 1 109
+byte 1 101
+byte 1 32
+byte 1 97
+byte 1 116
+byte 1 32
+byte 1 37
+byte 1 115
+byte 1 10
+byte 1 0
+align 1
+LABELV $714
+byte 1 112
+byte 1 97
+byte 1 116
+byte 1 104
+byte 1 95
+byte 1 99
+byte 1 111
+byte 1 114
+byte 1 110
+byte 1 101
+byte 1 114
+byte 1 0
+align 1
+LABELV $713
+byte 1 84
+byte 1 114
+byte 1 97
+byte 1 105
+byte 1 110
+byte 1 32
+byte 1 99
+byte 1 111
+byte 1 114
+byte 1 110
+byte 1 101
+byte 1 114
+byte 1 32
+byte 1 97
+byte 1 116
+byte 1 32
+byte 1 37
+byte 1 115
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 111
+byte 1 117
+byte 1 116
+byte 1 32
+byte 1 97
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 32
+byte 1 112
+byte 1 97
+byte 1 116
+byte 1 104
+byte 1 95
+byte 1 99
+byte 1 111
+byte 1 114
+byte 1 110
+byte 1 101
+byte 1 114
+byte 1 10
+byte 1 0
+align 1
+LABELV $707
+byte 1 84
+byte 1 114
+byte 1 97
+byte 1 105
+byte 1 110
+byte 1 32
+byte 1 99
+byte 1 111
+byte 1 114
+byte 1 110
+byte 1 101
+byte 1 114
+byte 1 32
+byte 1 97
+byte 1 116
+byte 1 32
+byte 1 37
+byte 1 115
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 111
+byte 1 117
+byte 1 116
+byte 1 32
+byte 1 97
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 10
+byte 1 0
+align 1
+LABELV $698
+byte 1 102
+byte 1 117
+byte 1 110
+byte 1 99
+byte 1 95
+byte 1 116
+byte 1 114
+byte 1 97
+byte 1 105
+byte 1 110
+byte 1 32
+byte 1 97
+byte 1 116
+byte 1 32
+byte 1 37
+byte 1 115
+byte 1 32
+byte 1 119
+byte 1 105
+byte 1 116
+byte 1 104
+byte 1 32
+byte 1 97
+byte 1 110
+byte 1 32
+byte 1 117
+byte 1 110
+byte 1 102
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 32
+byte 1 116
+byte 1 97
+byte 1 114
+byte 1 103
+byte 1 101
+byte 1 116
+byte 1 10
+byte 1 0
+align 1
+LABELV $668
+byte 1 52
+byte 1 0
+align 1
+LABELV $663
+byte 1 116
+byte 1 101
+byte 1 97
+byte 1 109
+byte 1 0
+align 1
+LABELV $647
+byte 1 104
+byte 1 101
+byte 1 105
+byte 1 103
+byte 1 104
+byte 1 116
+byte 1 0
+align 1
+LABELV $644
+byte 1 49
+byte 1 0
+align 1
+LABELV $643
+byte 1 50
+byte 1 48
+byte 1 48
+byte 1 0
+align 1
+LABELV $642
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 112
+byte 1 108
+byte 1 97
+byte 1 116
+byte 1 115
+byte 1 47
+byte 1 112
+byte 1 116
+byte 1 49
+byte 1 95
+byte 1 101
+byte 1 110
+byte 1 100
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $641
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 112
+byte 1 108
+byte 1 97
+byte 1 116
+byte 1 115
+byte 1 47
+byte 1 112
+byte 1 116
+byte 1 49
+byte 1 95
+byte 1 115
+byte 1 116
+byte 1 114
+byte 1 116
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $593
+byte 1 50
+byte 1 0
+align 1
+LABELV $592
+byte 1 56
+byte 1 0
+align 1
+LABELV $591
+byte 1 108
+byte 1 105
+byte 1 112
+byte 1 0
+align 1
+LABELV $584
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 101
+byte 1 108
+byte 1 101
+byte 1 118
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $583
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 114
+byte 1 49
+byte 1 95
+byte 1 101
+byte 1 110
+byte 1 100
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $582
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 114
+byte 1 49
+byte 1 95
+byte 1 115
+byte 1 116
+byte 1 114
+byte 1 116
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $573
+byte 1 104
+byte 1 101
+byte 1 97
+byte 1 108
+byte 1 116
+byte 1 104
+byte 1 0
+align 1
+LABELV $563
+byte 1 119
+byte 1 97
+byte 1 105
+byte 1 116
+byte 1 0
+align 1
+LABELV $560
+byte 1 115
+byte 1 112
+byte 1 101
+byte 1 101
+byte 1 100
+byte 1 0
+align 1
+LABELV $559
+byte 1 100
+byte 1 109
+byte 1 103
+byte 1 0
+align 1
+LABELV $558
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 119
+byte 1 111
+byte 1 111
+byte 1 100
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 95
+byte 1 99
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $557
+byte 1 115
+byte 1 111
+byte 1 117
+byte 1 110
+byte 1 100
+byte 1 47
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 115
+byte 1 47
+byte 1 119
+byte 1 111
+byte 1 111
+byte 1 100
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 95
+byte 1 111
+byte 1 46
+byte 1 119
+byte 1 97
+byte 1 118
+byte 1 0
+align 1
+LABELV $550
+byte 1 45
+byte 1 49
+byte 1 0
+align 1
+LABELV $549
+byte 1 101
+byte 1 108
+byte 1 101
+byte 1 118
+byte 1 97
+byte 1 116
+byte 1 111
+byte 1 114
+byte 1 95
+byte 1 105
+byte 1 110
+byte 1 100
+byte 1 101
+byte 1 120
+byte 1 0
+align 1
+LABELV $548
+byte 1 48
+byte 1 0
+align 1
+LABELV $547
+byte 1 97
+byte 1 110
+byte 1 103
+byte 1 108
+byte 1 101
+byte 1 0
+align 1
+LABELV $542
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 95
+byte 1 116
+byte 1 114
+byte 1 105
+byte 1 103
+byte 1 103
+byte 1 101
+byte 1 114
+byte 1 0
+align 1
+LABELV $437
+byte 1 49
+byte 1 32
+byte 1 49
+byte 1 32
+byte 1 49
+byte 1 0
+align 1
+LABELV $436
+byte 1 99
+byte 1 111
+byte 1 108
+byte 1 111
+byte 1 114
+byte 1 0
+align 1
+LABELV $435
+byte 1 108
+byte 1 105
+byte 1 103
+byte 1 104
+byte 1 116
+byte 1 0
+align 1
+LABELV $434
+byte 1 49
+byte 1 48
+byte 1 48
+byte 1 0
+align 1
+LABELV $433
+byte 1 110
+byte 1 111
+byte 1 105
+byte 1 115
+byte 1 101
+byte 1 0
+align 1
+LABELV $346
+byte 1 82
+byte 1 101
+byte 1 97
+byte 1 99
+byte 1 104
+byte 1 101
+byte 1 100
+byte 1 95
+byte 1 66
+byte 1 105
+byte 1 110
+byte 1 97
+byte 1 114
+byte 1 121
+byte 1 77
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 58
+byte 1 32
+byte 1 98
+byte 1 97
+byte 1 100
+byte 1 32
+byte 1 109
+byte 1 111
+byte 1 118
+byte 1 101
+byte 1 114
+byte 1 83
+byte 1 116
+byte 1 97
+byte 1 116
+byte 1 101
+byte 1 0
+align 1
+LABELV $318
+byte 1 102
+byte 1 117
+byte 1 110
+byte 1 99
+byte 1 95
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 0
+align 1
+LABELV $229
+byte 1 102
+byte 1 117
+byte 1 110
+byte 1 99
+byte 1 95
+byte 1 100
+byte 1 111
+byte 1 111
+byte 1 114
+byte 1 95
+byte 1 114
+byte 1 111
+byte 1 116
+byte 1 97
+byte 1 116
+byte 1 101
+byte 1 0
+align 1
+LABELV $84
+byte 1 112
+byte 1 117
+byte 1 115
+byte 1 104
+byte 1 101
+byte 1 100
+byte 1 95
+byte 1 112
+byte 1 32
+byte 1 62
+byte 1 32
+byte 1 38
+byte 1 112
+byte 1 117
+byte 1 115
+byte 1 104
+byte 1 101
+byte 1 100
+byte 1 91
+byte 1 77
+byte 1 65
+byte 1 88
+byte 1 95
+byte 1 71
+byte 1 69
+byte 1 78
+byte 1 84
+byte 1 73
+byte 1 84
+byte 1 73
+byte 1 69
+byte 1 83
+byte 1 93
+byte 1 0

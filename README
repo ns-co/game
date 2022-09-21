@@ -1,0 +1,91 @@
+
+## This is a Navy SEALs: Covert Operations Document.
+## copyright (c) 2003 by Team Mirage. All Rights reserved. 
+##
+## This document has to be carefully read before any files 
+## of the sourcecode may be opened, viewed, copied or 
+## modified.
+
+-----------------------------------------------------------
+
+ Navy SEALs: Covert Operations - Sourcecode Readme
+
+	 Navy SEALs: Covert Operations, the game
+	 Navy SEALs: Covert Operations, NSLauncher
+ 
+ Last Update: 	07. January 2004
+ Author(s): 	Martin 'Democritus' Nerurkar 
+ 
+-----------------------------------------------------------
+
+This document and all files contained within this archive
+are considered confidential and may not be modified or made
+publically available without the direct authorization of the 
+President of Team Mirage.
+
+You are not allowed to remove this Readme from the directory
+of the sourcecode. 
+
+-----------------------------------------------------------
+
+ Notes from previous coders:
+	
+-----------------------------------------------------------
+
+ Defcon-X: 	07. January 2004
+	
+-----------------------------------------------------------
+
+So, anyway. the code is not the cleanest. i learned using 
+the q3a engine with this project, but i learned it very 
+well.
+
+Q3a is very different from anything that was there before i 
+didn't realize this at first. 
+
+so i did some things very complicated which could be done 
+alot better. just rewrite it, it's not much i think.
+
+here are some tips: anything that can be done clientside 
+like rendering effects or decide which angle the smoke 
+comes out from hole X or rendering weapons MUST BE DONE 
+CLIENTSIDE. if you think it's only possible serverside, 
+think twice it must be done clientside. maybe transmit one 
+or two values using events and it is possible. save netdata. 
+use snapvector as often as possible, it saves alot. it 
+rounds floats to ints that are much smaller to transmit. 
+
+there are some things that should be implemented like 
+scripted bots for simple training missions (it's not hard 
+really, i had them in navy fortress ) vehicles would be
+good too, but are alot of work to get them nice. you have 
+to write alot of bg_pm* code then. you would also need a 
+new clientprediction keep that in mind.
+
+here are the things that need to be done:
+
+- a real item inventory system you have to use all game 
+	modules for it UI for the interface and selection 
+	game and cgame for logic and rendering
+- rewrite the damn CGAME 1st person weapon rendering 
+	function, it's weird,compilcated and long. 
+	i wanted to do this for ages.
+- flying bulltes? implement them again. don't know, if you 
+	want to then we need them predicted too. got some 
+	code for this somewhere or simply contact the auther
+	of that no lag mod he might help. anyway, check the
+	bullet firing function and see if you can improve
+	(keep in mind that it's exactly the same function as
+	in cg_weapons.c and g_weapons.c for prediction and
+	sever logic!!)
+- the doors. the doors. well, people seem to hate the new
+	rotating doors. the code for the old ones is still
+	there but they're unpredicted and that sucks.
+- assault fields. i hate my code. always wanted to rewrite.
+- a whole code cleanup and comment adding day ;P
+- how about player flying helicopters for insertion (easy
+	coding compared to car physics)
+
+this is it boys. have fun. 
+
+defconx
